@@ -4,7 +4,7 @@ import pygame
 from utils import *
 from settings import *
 
-from tower_of_hanoi import TowerOfHanoi
+from tower_of_hanoi.tower_of_hanoi import TowerOfHanoi
 from start_menu import StartMenu
 from game import Game
 
