@@ -25,3 +25,4 @@ yarn-error.log*
 /flask
 /react
 /__pycache__
+/tower_of_hanoi/__pycache__

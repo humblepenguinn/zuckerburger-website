@@ -4,7 +4,7 @@ from tower_of_hanoi.globals import *
 
 class Tile:
 
-    def __init__(self, main_screen: pygame.Surface, width) -> None:
+    def __init__(self, main_screen: pygame.Surface, width: int) -> None:
         self.main_screen = main_screen
         self.width = width
         self.color = TILE_COLOR
@@ -25,15 +25,15 @@ class Tile:
         self.rect.size = (self.width, TILE_HEIGHT)
         self.isBeingDragged = False            
 
-    def HandleDrag(self, dt):
+    def HandleDrag(self, dt: float):
         if not self.isBeingDragged:
             return
 
-        targetSize = pygame.math.Vector2(self.width, TILE_HEIGHT) * 2
+        targetSize = pygame.math.Vector2(self.width, TILE_HEIGHT) * 1.5
         speed = dt * 10
         self.UpdateRect(pygame.mouse.get_pos(), pygame.math.Vector2(self.rect.size).lerp(targetSize, speed))
 
-    def UpdateRect(self, centerPos, size=None):
+    def UpdateRect(self, centerPos: tuple[int, int], size=None):
         if self.rect is None:
             self.rect = pygame.rect.Rect(centerPos, (self.width, TILE_HEIGHT))
 
@@ -42,10 +42,10 @@ class Tile:
 
         self.rect.center = centerPos
 
-    def OnEvent(self, event):
+    def OnEvent(self, event: pygame.event.Event):
         pass
 
-    def Update(self, dt):
+    def Update(self, dt: float):
         if self.rect is None:
             return
         

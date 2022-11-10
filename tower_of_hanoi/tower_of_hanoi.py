@@ -37,7 +37,7 @@ class TowerOfHanoi(Game):
         for i in range(3):
             xPos = (self.width / 2) + ((i - 1) * difference)
             print(xPos)
-            tower = Tower(self.main_screen, xPos, self.height - (TOWER_HEIGHT / 2) - 100)
+            tower = Tower(self.main_screen, (xPos, self.height - (TOWER_HEIGHT / 2) - 100))
             self.towers.append(tower)
 
         # Add all tiles dynamically to the first tower
@@ -46,13 +46,13 @@ class TowerOfHanoi(Game):
             self.tiles.append(tile)
             self.towers[0].AddTile(tile)
 
-    def GetTowerForTile(self, tile):
+    def GetTowerForTile(self, tile: Tile) -> Tower:
         for tower in self.towers:
             for towerTile in tower.tiles:
                 if towerTile == tile:
                     return tower
 
-    def MoveTileToTower(self, tile, tower):
+    def MoveTileToTower(self, tile: Tile, tower: Tower):
         currentTower = self.GetTowerForTile(tile)
 
         if currentTower == None:
@@ -66,7 +66,7 @@ class TowerOfHanoi(Game):
 
         self.numOfMovesTaken += 1
 
-    def CanMoveTileToTower(self, tile, tower):
+    def CanMoveTileToTower(self, tile: Tile, tower: Tower):
         # If there are no tiles on the tower, means can move to that tower
         if len(tower.tiles) == 0:
             return True
@@ -124,7 +124,7 @@ class TowerOfHanoi(Game):
 
         return False, False
 
-    def Update(self, dt):
+    def Update(self, dt: float):
         if self.gameOver:
             return self.gameOver, self.won, self.numOfMovesTaken
 
