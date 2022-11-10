@@ -5,16 +5,20 @@ from utils import *
 from settings import *
 
 from tower_of_hanoi import TowerOfHanoi
+from game import Game
 
 clock = pygame.time.Clock()
 
 pygame.init()
 
-towerOfHanoi = TowerOfHanoi(SCREEN)
-
 SCREEN_WIDTH, SCREEN_HEIGHT = SCREEN.get_width(), SCREEN.get_height()
 
 pygame.display.set_caption("Zuckerburger")
+
+games = []
+games.append(TowerOfHanoi(SCREEN, clock))
+
+activeGameIndex = 0
 
 def main():
     while True:
@@ -24,12 +28,16 @@ def main():
             if event.type == pygame.QUIT:
                 return
 
-            towerOfHanoi.OnEvent(event)
+            if games[activeGameIndex] != None:
+                games[activeGameIndex].OnEvent(event)
 
         SCREEN.fill(BLACK)
 
-        towerOfHanoi.Update()
-        towerOfHanoi.Render()
+        if games[activeGameIndex] != None:
+            obj = games[activeGameIndex].Update()
+            games[activeGameIndex].Render()
+
+            print(obj)
 
         pygame.display.update()
 
