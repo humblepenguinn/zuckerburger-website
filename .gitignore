@@ -26,3 +26,4 @@ yarn-error.log*
 /react
 /__pycache__
 /tower_of_hanoi/__pycache__
+*.pyc
