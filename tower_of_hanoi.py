@@ -1,7 +1,8 @@
 import pygame
+import pygame.math
 import datetime
 
-from utils import get_font
+from utils import get_font, InputBox
 from game import Game
 
 TOWER_HEIGHT = 400
@@ -45,25 +46,22 @@ class Tower:
         for tile in self.tiles:
             tile.OnEvent(event)
 
-    def Update(self, game):
+    def Update(self, dt, game):
         if self.rect.collidepoint(pygame.mouse.get_pos()) and game.currentlyDraggingTile != None and game.CanMoveTileToTower(game.currentlyDraggingTile, self):
             self.color = HOVER_TOWER_COLOR
         else:
             self.color = TOWER_COLOR
 
-        for tile in self.tiles:
-            tile.Update()
-
         i = len(self.tiles) - 1
         for tile in self.tiles:
             if not tile.isBeingDragged:
-                tile.UpdatePosition((self.x_position, -(i * (TILE_HEIGHT + 10)) + self.rect.bottom))
+                tile.UpdateRect((self.x_position, -(i * (TILE_HEIGHT + 10)) + self.rect.bottom))
 
-            tile.Update()
+            tile.Update(dt)
             i -= 1
 
     def Render(self):
-        pygame.draw.rect(self.main_screen, self.color, self.rect)
+        pygame.draw.rect(self.main_screen, self.color, self.rect, border_radius=10)
 
         #self.main_screen.blit(self.image, self.rect)
 
@@ -87,16 +85,35 @@ class Tile:
 
         self.isBeingDragged = False
 
-    def UpdatePosition(self, centerPos):
+    def StartDrag(self):
+        self.isBeingDragged = True
+
+    def EndDrag(self):
+        self.isBeingDragged = False
+        self.rect.size = (self.width, TILE_HEIGHT)
+        self.isBeingDragged = False            
+
+    def HandleDrag(self, dt):
+        if not self.isBeingDragged:
+            return
+
+        targetSize = (self.width + 30, TILE_HEIGHT + 10)
+        speed = (dt / 1000) * 15
+        self.UpdateRect(pygame.mouse.get_pos(), pygame.math.Vector2(self.rect.size).lerp(pygame.math.Vector2(targetSize), speed))
+
+    def UpdateRect(self, centerPos, size=None):
         if self.rect is None:
             self.rect = pygame.rect.Rect(centerPos, (self.width, TILE_HEIGHT))
+
+        if size is not None:
+            self.rect.size = tuple(size)
 
         self.rect.center = centerPos
 
     def OnEvent(self, event):
         pass
 
-    def Update(self):
+    def Update(self, dt):
         if self.rect is None:
             return
         
@@ -106,8 +123,11 @@ class Tile:
         else:
             self.color = TILE_COLOR
 
+        # Drag stuff
+        self.HandleDrag(dt)
+
     def Render(self):
-        pygame.draw.rect(self.main_screen, self.color, self.rect)
+        pygame.draw.rect(self.main_screen, self.color, self.rect, border_radius=5)
         #self.main_screen.blit(self.image, self.rect)
 
 
@@ -122,15 +142,18 @@ class TowerOfHanoi(Game):
         self.tiles = []
         self.currentlyDraggingTile = None
         
-        self.totalTimeRemaining = datetime.timedelta(seconds=5)
-        self.timerText = get_font(100).render("30:00", True, (255, 255, 255))
-        self.timerTextRect = self.timerText.get_rect(center=(100, 50))
+        self.totalTimeRemaining = datetime.timedelta(minutes=5)
+        self.timerText = get_font(100).render(str(self.totalTimeRemaining)[2:7], True, (255, 255, 255))
+        self.timerTextRect = self.timerText.get_rect(center=(200, 100))
         self.started = False
 
         self.gameOver = False
         self.won = False
         self.numOfMovesTaken = 0
 
+        self.InitTowers()
+
+    def InitTowers(self):
         # Some calculations for where to position the 3 towers
         difference = (self.width - 100) / 3
         for i in range(3):
@@ -161,7 +184,7 @@ class TowerOfHanoi(Game):
         tower.AddTile(tile, True)
 
         if not self.started:
-            self.started = True
+            self.started = True 
 
         self.numOfMovesTaken += 1
 
@@ -192,7 +215,7 @@ class TowerOfHanoi(Game):
             for tile in self.tiles:
                 if tile.rect.collidepoint(pygame.mouse.get_pos()) and self.GetTowerForTile(tile).tiles[0] == tile:
                     self.currentlyDraggingTile = tile
-                    self.currentlyDraggingTile.isBeingDragged = True
+                    self.currentlyDraggingTile.StartDrag()
                     break
 
         elif event.type == pygame.MOUSEBUTTONUP and self.currentlyDraggingTile != None:
@@ -202,7 +225,7 @@ class TowerOfHanoi(Game):
                     self.MoveTileToTower(self.currentlyDraggingTile, tower)
                     break
 
-            self.currentlyDraggingTile.isBeingDragged = False
+            self.currentlyDraggingTile.EndDrag()
             self.currentlyDraggingTile = None
 
         for tower in self.towers:
@@ -223,11 +246,13 @@ class TowerOfHanoi(Game):
 
         return False, False
 
-    def Update(self):
+    def Update(self, dt):
+        if self.gameOver:
+            return self.gameOver, self.won, self.numOfMovesTaken
 
         # Update all 3 towers and each of its childs
         for tower in self.towers:
-            tower.Update(self)
+            tower.Update(dt, self)
         
         # GetCurrentGameState returns a tuple 
         # with 2 bools, game over and game won
@@ -246,7 +271,7 @@ class TowerOfHanoi(Game):
 
         if self.started:
             # Decrease our time remaining each frame
-            self.totalTimeRemaining -= datetime.timedelta(milliseconds=self.timer.get_time())
+            self.totalTimeRemaining -= datetime.timedelta(milliseconds=dt)
 
             # Makes sure that even if the time remaining goes below 0, it will still display 0 on our text
             if self.totalTimeRemaining <= datetime.timedelta(0):
@@ -254,9 +279,6 @@ class TowerOfHanoi(Game):
 
             # Render the time remaining text with some formatting
             self.timerText = get_font(100).render(str(self.totalTimeRemaining)[2:7], True, (255, 255, 255))
-
-        if self.currentlyDraggingTile != None:
-            self.currentlyDraggingTile.UpdatePosition(pygame.mouse.get_pos())
 
         return False, False, self.numOfMovesTaken
 

@@ -1,5 +1,72 @@
 import pygame
 
+import datetime
+
+class InputBox():
+	def __init__(self, pos, size, maxCharacters=10, bounding_color=(255,255,255), text_color=(255,255,255), isPassword=False) -> None:
+		self.pos = pos
+		self.size = size
+		self.bounding_color = bounding_color
+		self.text_color = text_color
+		self.isPassword = isPassword
+		self.font = get_font(size)
+		self.maxCharacters = maxCharacters
+		self.text = ""
+		self.text_surface = self.font.render(''.join(["A" for i in range(maxCharacters)]), True, (255, 255, 255))
+		self.text_rect = self.text_surface.get_rect(center=pos)
+		self.text_surface = self.font.render('', True, (255, 255, 255))
+
+		self.boundingRect = self.text_rect.copy()
+		self.boundingRect.width += 20
+		self.boundingRect.x -= 10
+
+		self.nextBlink = datetime.datetime.now() + datetime.timedelta(milliseconds=500)
+		self.currentBlinkStatus = False
+		self.cursor = self.font.render('|', True, self.text_color)
+		self.cursor_rect = self.text_rect.copy()
+		self.cursor_rect.y -= 1
+		self.cursor_rect.x -= 10
+
+		self.isFocused = False
+
+	def OnEvent(self, event: pygame.event.Event):
+		if event.type == pygame.MOUSEBUTTONDOWN:
+			if self.boundingRect.collidepoint(pygame.mouse.get_pos()):
+				self.isFocused = True
+			else:
+				self.isFocused = False
+
+		elif event.type == pygame.MOUSEMOTION:
+			if self.boundingRect.collidepoint(pygame.mouse.get_pos()):
+				# TODO: Handle some highlighting color change shit
+				pass
+
+		elif event.type == pygame.KEYDOWN and self.isFocused:
+			key = event.key
+
+			if event.key == pygame.K_BACKSPACE and len(self.text) > 0:
+				self.text = self.text[:-1]
+			elif len(self.text) < self.maxCharacters:
+				self.text += event.unicode
+
+			if not self.isPassword:
+				self.text_surface = self.font.render(self.text, True, self.text_color)
+			else:
+				self.text_surface = self.font.render(''.join(['*' for i in range(len(self.text))]), True, self.text_color)
+				
+			self.cursor_rect.x = self.text_surface.get_width() + self.pos[0] - (self.boundingRect.width / 2) + 3
+
+	def Render(self, screen: pygame.Surface):
+		if datetime.datetime.now() >= self.nextBlink:
+			self.currentBlinkStatus = not self.currentBlinkStatus
+			self.nextBlink = datetime.datetime.now() + datetime.timedelta(milliseconds=500)
+
+		pygame.draw.rect(screen, self.bounding_color, self.boundingRect, 2)
+
+		screen.blit(self.text_surface, self.text_rect)
+
+		if self.currentBlinkStatus and self.isFocused:
+			screen.blit(self.cursor, self.cursor_rect)
 
 class Button():
 	def __init__(self, image, pos, text_input, font, base_color, hovering_color):
@@ -30,6 +97,7 @@ class Button():
 			self.text = self.font.render(self.text_input, True, self.hovering_color)
 		else:
 			self.text = self.font.render(self.text_input, True, self.base_color)
-            
+        
+
 def get_font(size):
-    return pygame.font.Font("assets/fonts/Pixels.ttf", size)
+    return pygame.font.SysFont("Courier New", size)

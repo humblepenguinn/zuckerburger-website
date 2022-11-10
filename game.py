@@ -8,7 +8,7 @@ class Game:
     def OnEvent(self, event: pygame.event.Event):
         pass
 
-    def Update(self):
+    def Update(self, dt):
         pass
 
     def Render(self):
