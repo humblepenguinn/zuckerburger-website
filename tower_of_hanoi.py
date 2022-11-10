@@ -97,9 +97,9 @@ class Tile:
         if not self.isBeingDragged:
             return
 
-        targetSize = (self.width + 30, TILE_HEIGHT + 10)
-        speed = (dt / 1000) * 15
-        self.UpdateRect(pygame.mouse.get_pos(), pygame.math.Vector2(self.rect.size).lerp(pygame.math.Vector2(targetSize), speed))
+        targetSize = pygame.math.Vector2(self.width, TILE_HEIGHT) * 2
+        speed = dt * 10
+        self.UpdateRect(pygame.mouse.get_pos(), pygame.math.Vector2(self.rect.size).lerp(targetSize, speed))
 
     def UpdateRect(self, centerPos, size=None):
         if self.rect is None:
@@ -271,18 +271,17 @@ class TowerOfHanoi(Game):
 
         if self.started:
             # Decrease our time remaining each frame
-            self.totalTimeRemaining -= datetime.timedelta(milliseconds=dt)
+            self.totalTimeRemaining -= datetime.timedelta(seconds=dt)
 
             # Makes sure that even if the time remaining goes below 0, it will still display 0 on our text
             if self.totalTimeRemaining <= datetime.timedelta(0):
                 self.totalTimeRemaining = datetime.timedelta(0)
 
-            # Render the time remaining text with some formatting
-            self.timerText = get_font(100).render(str(self.totalTimeRemaining)[2:7], True, (255, 255, 255))
-
         return False, False, self.numOfMovesTaken
 
     def Render(self):
+        # Render the time remaining text with some formatting
+        self.timerText = get_font(100).render(str(self.totalTimeRemaining)[2:7], True, (255, 255, 255))
         # Renders the timer text to the screen
         self.main_screen.blit(self.timerText, self.timerTextRect)
 
