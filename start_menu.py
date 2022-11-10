@@ -18,6 +18,8 @@ class StartMenu(Game):
         self.hc_input_box = InputBox((self.main_screen.get_width() / 2, self.main_screen.get_height() / 2), 50)
         self.password_input_box = InputBox((self.main_screen.get_width() / 2, (self.main_screen.get_height() / 2) + 80), 50, isPassword=True)
 
+        self.start_button = Button(None, (self.main_screen.get_width() / 2, (self.main_screen.get_height() / 2) + 200), "START", 50, (255, 255, 255), (192, 34, 200))
+
     def OnEvent(self, event: pygame.event.Event):
         super().OnEvent(event)
 
@@ -27,6 +29,7 @@ class StartMenu(Game):
     def Update(self, dt):
         super().Update(dt)
 
+        self.start_button.Update(dt)
         self.hc_input_box.Update(dt)
         self.password_input_box.Update(dt)
 
@@ -38,3 +41,5 @@ class StartMenu(Game):
         self.main_screen.blit(self.prompt_text, self.prompt_text_rect)
         self.hc_input_box.Render(self.main_screen)
         self.password_input_box.Render(self.main_screen)
+
+        self.start_button.Render(self.main_screen)
