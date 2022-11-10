@@ -27,6 +27,8 @@ class StartMenu(Game):
     def Update(self, dt):
         super().Update(dt)
 
+        self.hc_input_box.Update(dt)
+        self.password_input_box.Update(dt)
 
     def Render(self):
         super().Render()

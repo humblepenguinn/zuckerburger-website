@@ -27,21 +27,25 @@ class InputBox():
 		self.cursor_rect.y -= 1
 		self.cursor_rect.x -= 10
 
-		self.isFocused = False
+		self.mouse_hovering = False
+		self.bg_alpha = 0.0
+		self.bg_alpha_target = 0.0
+		self.is_focused = False
 
 	def OnEvent(self, event: pygame.event.Event):
 		if event.type == pygame.MOUSEBUTTONDOWN:
 			if self.boundingRect.collidepoint(pygame.mouse.get_pos()):
-				self.isFocused = True
+				self.is_focused = True
+				self.bg_alpha_target = 10.0
 			else:
-				self.isFocused = False
-
-		elif event.type == pygame.MOUSEMOTION:
+				self.is_focused = False
+				self.bg_alpha_target = 0.0
+		
+		elif event.type == pygame.MOUSEBUTTONUP:
 			if self.boundingRect.collidepoint(pygame.mouse.get_pos()):
-				# TODO: Handle some highlighting color change shit
-				pass
+				self.bg_alpha_target = 55.0
 
-		elif event.type == pygame.KEYDOWN and self.isFocused:
+		elif event.type == pygame.KEYDOWN and self.is_focused:
 			key = event.key
 
 			if event.key == pygame.K_BACKSPACE and len(self.text) > 0:
@@ -56,16 +60,33 @@ class InputBox():
 				
 			self.cursor_rect.x = self.text_surface.get_width() + self.pos[0] - (self.boundingRect.width / 2) + 3
 
+	def SetMouseHover(self, hover):
+		self.mouse_hovering = hover
+		
+		if self.is_focused:
+			return
+
+		if self.mouse_hovering:
+			self.bg_alpha_target = 55.0
+		else:
+			self.bg_alpha_target = 0.0
+
+	def Update(self, dt):
+		self.SetMouseHover(self.boundingRect.collidepoint(pygame.mouse.get_pos()))
+
+		self.bg_alpha = lerp(self.bg_alpha, self.bg_alpha_target, dt * 10)
+
 	def Render(self, screen: pygame.Surface):
 		if datetime.datetime.now() >= self.nextBlink:
 			self.currentBlinkStatus = not self.currentBlinkStatus
 			self.nextBlink = datetime.datetime.now() + datetime.timedelta(milliseconds=500)
 
+		draw_rect_alpha(screen, (255, 255, 255, self.bg_alpha), self.boundingRect)
 		pygame.draw.rect(screen, self.bounding_color, self.boundingRect, 2)
 
 		screen.blit(self.text_surface, self.text_rect)
 
-		if self.currentBlinkStatus and self.isFocused:
+		if self.currentBlinkStatus and self.is_focused:
 			screen.blit(self.cursor, self.cursor_rect)
 
 class Button():
@@ -98,6 +119,13 @@ class Button():
 		else:
 			self.text = self.font.render(self.text_input, True, self.base_color)
         
+def lerp(a: float, b: float, f: float):
+    return a * (1.0 - f) + (b * f)
+	
+def draw_rect_alpha(surface, color, rect):
+    shape_surf = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+    pygame.draw.rect(shape_surf, color, shape_surf.get_rect())
+    surface.blit(shape_surf, rect)
 
 def get_font(size):
     return pygame.font.SysFont("Courier New", size)
