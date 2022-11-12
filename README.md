@@ -2,9 +2,9 @@
 
 ## Running the project
 Make sure the latest version of python and pip is installed
-### Install pygame
+### Install the required dependencies
 ```bash
-pip install pygame
+pip install -r requirements.txt
 ```
 ### Run the project
 ```bash
