@@ -1,3 +1,4 @@
+
 import pygame
 
 class Game:
@@ -8,8 +9,11 @@ class Game:
     def OnEvent(self, event: pygame.event.Event):
         pass
 
-    def Update(self, dt: float):
+    def Update(self, dt):
         pass
 
     def Render(self):
+        pass
+
+    def main(self):
         pass

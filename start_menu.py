@@ -1,12 +1,10 @@
 import pygame
 
-from game import Game
 from utils import *
 
-class StartMenu(Game):
+class StartMenu():
     def __init__(self, main_screen: pygame.Surface, timer: pygame.time.Clock) -> None:
-        super().__init__(main_screen, timer)
-
+        self.main_screen = main_screen
         self.greeting_font = get_font(100)
         self.greeting_text = self.greeting_font.render("Zuckerberg's IDE", True, (255, 255, 255))
         self.greeting_text_rect = self.greeting_text.get_rect(center=(self.main_screen.get_width() / 2, self.main_screen.get_height() * 0.15))
@@ -18,23 +16,20 @@ class StartMenu(Game):
         self.hc_input_box = InputBox((self.main_screen.get_width() / 2, self.main_screen.get_height() / 2), 50)
         self.password_input_box = InputBox((self.main_screen.get_width() / 2, (self.main_screen.get_height() / 2) + 80), 50, isPassword=True)
 
-        self.start_button = Button(None, (self.main_screen.get_width() / 2, (self.main_screen.get_height() / 2) + 200), "START", 50, (255, 255, 255), (192, 34, 200))
+
+        self.start_button = Button(None, (self.main_screen.get_width() / 2, (self.main_screen.get_height() / 2) + 200), "START", get_font(50), (255, 255, 255), (192, 34, 200))
 
     def OnEvent(self, event: pygame.event.Event):
-        super().OnEvent(event)
+
 
         self.hc_input_box.OnEvent(event)
         self.password_input_box.OnEvent(event)
 
     def Update(self, dt):
-        super().Update(dt)
-
-        self.start_button.Update(dt)
         self.hc_input_box.Update(dt)
         self.password_input_box.Update(dt)
 
     def Render(self):
-        super().Render()
         self.main_screen.fill((0, 0, 0))
 
         self.main_screen.blit(self.greeting_text, self.greeting_text_rect)
@@ -42,4 +37,4 @@ class StartMenu(Game):
         self.hc_input_box.Render(self.main_screen)
         self.password_input_box.Render(self.main_screen)
 
-        self.start_button.Render(self.main_screen)
+        self.start_button.update(self.main_screen)

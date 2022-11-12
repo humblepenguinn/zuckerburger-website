@@ -92,49 +92,34 @@ class InputBox():
 			screen.blit(self.cursor, self.cursor_rect)
 
 class Button():
-	def __init__(self, image, pos: tuple[int, int], text_input: str, size: int, base_color, hovering_color):
-		self.image = image	
-		self.pos = pos
-		self.font = get_font(size)
-		self.base_color, self.hovering_color = pygame.Color(base_color), pygame.Color(hovering_color)
+	def __init__(self, image, pos, text_input, font, base_color, hovering_color):
+		self.image = image
+		self.x_pos = pos[0]
+		self.y_pos = pos[1]
+		self.font = font
+		self.base_color, self.hovering_color = base_color, hovering_color
 		self.text_input = text_input
 		self.text = self.font.render(self.text_input, True, self.base_color)
-
 		if self.image is None:
 			self.image = self.text
+		self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
+		self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
 
-		self.rect = self.image.get_rect(center=(self.pos[0], self.pos[1]))
-		self.text_rect = self.text.get_rect(center=(self.pos[0], self.pos[1]))
-
-		self.bounding_rect = self.text_rect.copy()
-		self.bounding_rect.width += 40
-		self.bounding_rect.height += 20
-		self.bounding_rect.center = pos
-
-		self.drawing_color = pygame.Color(self.base_color)
-		self.drawing_color.a = 100
-		self.mouse_hovering = False
-
-	def Update(self, dt):			
-		# handle color lerping
-		targetColor = self.base_color
-		if self.bounding_rect.collidepoint(pygame.mouse.get_pos()):
-			targetColor = self.hovering_color
-
-		oldAlpha = self.drawing_color.a
-		self.drawing_color = self.drawing_color.lerp(targetColor, min(1.0, dt * 10))
-		self.drawing_color.a = oldAlpha
-
-	def Render(self, screen):
+	def update(self, screen):
 		if self.image is not None:
 			screen.blit(self.image, self.rect)
-
-		draw_rect_alpha(screen, self.drawing_color, self.bounding_rect)
-		draw_rect_alpha(screen, (self.drawing_color.r, self.drawing_color.g, self.drawing_color.b, self.drawing_color.a + 50), self.bounding_rect, 2)
-
-		self.text = self.font.render(self.text_input, True, self.drawing_color)
-
 		screen.blit(self.text, self.text_rect)
+
+	def checkForInput(self, position):
+		if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
+			return True
+		return False
+
+	def changeColor(self, position):
+		if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
+			self.text = self.font.render(self.text_input, True, self.hovering_color)
+		else:
+			self.text = self.font.render(self.text_input, True, self.base_color)
         
 def lerp(a: float, b: float, f: float):
     return a * (1.0 - f) + (b * f)
