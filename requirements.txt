@@ -2,5 +2,4 @@ pygame
 Flask-Bcrypt
 Flask-Session
 Flask-Cors
-redis
 python-dotenv

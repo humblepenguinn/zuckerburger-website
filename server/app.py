@@ -1,5 +1,5 @@
 import secrets
-from flask import Flask, request, abort, jsonify, session
+from flask import Flask, request, abort, jsonify
 from flask_bcrypt import Bcrypt
 from flask_session import Session
 from flask_cors import CORS
@@ -37,8 +37,6 @@ def register_user():
 
     hashed_password = bcrypt.generate_password_hash(password)
     new_user = User(hcid=hcid, password=hashed_password, current_game="1", score="0", total_time_taken="0")
-
-    session["user_id"] = new_user.id
 
     db.session.add(new_user)
     db.session.commit()
