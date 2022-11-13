@@ -328,8 +328,8 @@ def handle_events(screen):
 
 
 
-def draw_menu():
-    pass
+def draw_menu(screen):
+    screen.blit(font.render("P R E S S  S P A C E B A R  T O  C O N T I N U E", True, WHITE), (SCREEN_WIDTH // 2 - 250, SCREEN_HEIGHT // 2))
 
 def draw_game_over(screen):
     #screen.blit(font.render("GAME OVER", True, WHITE), (SCREEN_WIDTH/2-50, SCREEN_HEIGHT/2))
@@ -351,12 +351,14 @@ class MainGame:
     def __init__(self, screen):
         self.screen = screen
 
+    def OnEvent(self, event):
+        pass
     def Render(self):
         while(handle_events(self.screen)):
             clock.tick(80)
             self.screen.fill((20,20,20))
             if(gamestate == MENU):
-                draw_menu()
+                draw_menu(self.screen)
             elif(gamestate == GAMEPLAY):
                 for obstacle in obstacles:
                     obstacle.update()
@@ -381,7 +383,7 @@ class MainGame:
 
             pygame.display.flip()
 
-    def Update(dt):
+    def Update(self, dt):
         pass
 
 

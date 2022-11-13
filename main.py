@@ -50,11 +50,12 @@ def main():
                         with open('currentUser', 'wb') as f:
                             pickle.dump(str(startMenuScreen.hc_input_box.text), f)
                         activeGameIndex += 1
+                    # activeGameIndex += 1
 
             if event.type == pygame.KEYDOWN:
-                # if event.key == pygame.K_p:
-                #     activeGameIndex += 1
-                pass
+                if event.key == pygame.K_p:
+                    activeGameIndex += 1
+                #pass
 
             if screens[activeGameIndex] != None:
                 screens[activeGameIndex].OnEvent(event)
