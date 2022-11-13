@@ -47,7 +47,8 @@ def main():
                         # Unauthorized
                         pass
                     else:
-                        pickle.dump(str(startMenuScreen.hc_input_box.text), 'currentUser')
+                        with open('currentUser', 'wb') as f:
+                            pickle.dump(str(startMenuScreen.hc_input_box.text), f)
                         activeGameIndex += 1
 
             if event.type == pygame.KEYDOWN:
