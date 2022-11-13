@@ -9,9 +9,9 @@ from globals import *
 
 from games.tower_of_hanoi import *
 from games.find_the_hidden_object import *
+from games.klotski import *
 import games.color_switch
 from start_menu import StartMenu
-
 
 clock = pygame.time.Clock()
 
@@ -22,7 +22,7 @@ SCREEN_WIDTH, SCREEN_HEIGHT = SCREEN.get_width(), SCREEN.get_height()
 pygame.display.set_caption("Zuckerburger")
 
 startMenuScreen = StartMenu(SCREEN, clock)
-screens = [startMenuScreen, TowerOfHanoi(SCREEN, clock), FindTheHiddenObj(SCREEN, clock), games.color_switch.MainGame(SCREEN), None]
+screens = [Klotski(SCREEN, clock), startMenuScreen, TowerOfHanoi(SCREEN, clock), FindTheHiddenObj(SCREEN, clock), games.color_switch.MainGame(SCREEN), None]
 
 activeGameIndex = 0
 
