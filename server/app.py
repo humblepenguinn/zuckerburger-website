@@ -5,7 +5,7 @@ from flask_session import Session
 from flask_cors import CORS
 
 from models import db, User
-from config import ApplicationConfig
+from globals import ApplicationConfig
 
 app = Flask(__name__)
 app.config.from_object(ApplicationConfig)
@@ -62,6 +62,28 @@ def login():
         return jsonify({"error": "Unauthorized"}), 401
 
     return jsonify({"id": user.id, "hcid": user.hcid})
+
+@app.route("/add-timer", methods=["POST"])
+def add_timer():
+    pass
+
+# {"hcid": str(user), 'time': str(time), 'puzzle_level': str(puzzle_level)}
+@app.route("/add-shit", methods=["POST"])
+def add_shit():
+    hcid = request.json["hcid"]
+    time = request.json['time']
+    puzzle_level = request.json["puzzle_level"]
+
+    user = User.query.filter_by(hcid=hcid).first()
+
+    if user is None:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user.time = time
+    user.puzzle_level = puzzle_level
+
+    db.session.commit()
+
 
 
 if __name__ == "__main__":

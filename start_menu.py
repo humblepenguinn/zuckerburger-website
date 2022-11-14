@@ -6,6 +6,8 @@ from globals import *
 
 from utils import *
 
+
+
 class StartMenu():
     def __init__(self, main_screen: pygame.Surface, timer: pygame.time.Clock) -> None:
         self.main_screen = main_screen
@@ -24,8 +26,6 @@ class StartMenu():
         self.start_button = Button(None, (self.main_screen.get_width() / 2, (self.main_screen.get_height() / 2) + 200), "START", get_font(50), (255, 255, 255), (192, 34, 200))
 
     def OnEvent(self, event: pygame.event.Event):
-
-
         self.hc_input_box.OnEvent(event)
         self.password_input_box.OnEvent(event)
 
@@ -40,10 +40,14 @@ class StartMenu():
                     with open('currentUser', 'wb') as f:
                         pickle.dump(str(self.hc_input_box.text), f)
                     activeGameIndex += 1
+                    start_time = pygame.time.get_ticks()
+
+
 
     def Update(self, dt):
         self.hc_input_box.Update(dt)
         self.password_input_box.Update(dt)
+        return None
 
     def Render(self):
         self.main_screen.fill((0, 0, 0))

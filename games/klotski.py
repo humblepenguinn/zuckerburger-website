@@ -2,8 +2,11 @@ from collections import namedtuple
 
 from games import Game
 from settings import *
+import globals
 
 import pygame
+
+from utils import get_font
 
 pygame.font.init()
 
@@ -412,13 +415,13 @@ class Board:
 class Klotski(Game):
     def __init__(self, main_screen: pygame.Surface, timer: pygame.time.Clock):
         super().__init__(main_screen, timer)
-
+        self.time_taken = timer.get_time()
         self.board = Board.from_start_position()
         self.selected_piece = None
 
         # A surface to draw the board onto..
         self.board_surf = pygame.Surface(BOARD_SIZE)
-
+        self.timer_string = None
 
     def Draw(self):
         board_color = (205, 127, 50)
@@ -500,14 +503,18 @@ class Klotski(Game):
         if _event.type == pygame.MOUSEBUTTONUP and _event.button == 1:  # left click
             self.handle_drop(_event.pos)
 
- 
+
     def OnEvent(self, event: pygame.event.Event):
         super().OnEvent(event)
         self.handle_user_event(event)
 
+    def Update(self, dt):
+        return None
+
     def Render(self):
         super().Render()
         self.Draw()
+
         pygame.display.update()
 
         # Power keys while navigating history
@@ -517,3 +524,6 @@ class Klotski(Game):
             self.board.history_back()
         elif keys[pygame.K_UP]:
             self.board.history_forward()
+
+
+

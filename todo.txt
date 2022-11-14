@@ -1,12 +1,7 @@
-import datetime
-import pickle
 import pygame, pygame.gfxdraw, math, random
 from games import Game
 from settings import *
 import sys
-
-from utils import get_font
-import globals
 
 PURPLE = (140, 19, 251)
 RED = (255, 0, 128)
@@ -18,13 +13,12 @@ WHITE = (255, 255, 255)
 obstacles = list()
 stars = list()
 colorswitches = list()
-MENU, GAMEPLAY, PAUSE, GAMEOVER, WON = range(5)
+MENU, GAMEPLAY, PAUSE, GAMEOVER = range(4)
 gamestate = MENU
 score = 0
 highscore = 0
 
 GRAVITY = 850
-
 
 pygame.font.init()
 font = pygame.font.Font(pygame.font.get_default_font(), 24)
@@ -284,7 +278,7 @@ def restart(screen):
     del obstacles[:]
     del colorswitches[:]
     for i in range(5):
-        o_type = 0
+        o_type = random.randint(0,1)
         if(o_type == 0):
             temp = Obstacle(screen, SCREEN_WIDTH/2, -600*i)
             obstacles.append(temp)
@@ -335,14 +329,9 @@ def draw_ui(screen):
 class MainGame(Game):
     def __init__(self, main_screen: pygame.Surface, timer: pygame.time.Clock):
         super().__init__(main_screen, timer)
-        self.timer_string = None
-        
 
     def OnEvent(self, event):
         global gamestate
-
-        if score == 5:
-            gamestate = WON
         if(event.type == pygame.QUIT):
             sys.exit(1)
         if(event.type == pygame.KEYDOWN):
@@ -359,10 +348,8 @@ class MainGame(Game):
                     restart(self.main_screen)
                     gamestate = GAMEPLAY
 
-    def Render(self) -> int:
+    def Render(self):
         self.main_screen.fill((20,20,20))
-
-
         if(gamestate == MENU):
             draw_menu(self.main_screen)
         elif(gamestate == GAMEPLAY):
@@ -384,18 +371,7 @@ class MainGame(Game):
             draw_game_over(self.main_screen)
 
 
-
-
-
-
-
     def Update(self, dt):
-
-        if (gamestate == WON):
-            return True
-
-
-
         if gamestate == GAMEPLAY:
             for obstacle in obstacles:
                 obstacle.update(dt)
@@ -404,5 +380,4 @@ class MainGame(Game):
                 star.update(dt)
 
 
-
-
+ra
