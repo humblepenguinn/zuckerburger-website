@@ -1,5 +1,8 @@
 # game
 
+time_taken = 0
+activeGameIndex = 0
+
 def initialize():
     global time_taken, activeGameIndex
     time_taken = 0

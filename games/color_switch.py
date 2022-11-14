@@ -394,8 +394,6 @@ class MainGame(Game):
         if (gamestate == WON):
             return True
 
-
-
         if gamestate == GAMEPLAY:
             for obstacle in obstacles:
                 obstacle.update(dt)

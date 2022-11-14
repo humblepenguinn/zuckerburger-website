@@ -1,4 +1,3 @@
-
 import pickle
 import globals
 import pygame
@@ -25,10 +24,11 @@ SCREEN_WIDTH, SCREEN_HEIGHT = SCREEN.get_width(), SCREEN.get_height()
 pygame.display.set_caption("Zuckerburger")
 
 startMenuScreen = StartMenu(SCREEN, clock)
-screens = [startMenuScreen, TowerOfHanoi(SCREEN, clock), Klotski(SCREEN, clock), FindTheHiddenObj(SCREEN, clock), games.color_switch.MainGame(SCREEN, clock), None]
-
+screens = [startMenuScreen, TowerOfHanoi(SCREEN, clock), Klotski(SCREEN, clock), FindTheHiddenObj(SCREEN, clock), games.color_switch.MainGame(SCREEN, clock)]
 
 globals.initialize()
+
+defaultFont = get_font(50)
 
 def send_data(time, puzzle_level):
     user = None
@@ -44,6 +44,9 @@ def send_data(time, puzzle_level):
 def main():
     start_time=0
     counting_minutes=0
+    won = False
+    completed = False
+
     while True:
         dt = clock.tick(FPS) / 1000  # Amount of seconds between each loop.
 
@@ -53,10 +56,10 @@ def main():
             if event.type == pygame.QUIT:
                 return
 
-            if screens[globals.activeGameIndex] != None:
-                    screens[globals.activeGameIndex].OnEvent(event)
+            if globals.activeGameIndex < len(screens) and screens[globals.activeGameIndex] != None:
+                screens[globals.activeGameIndex].OnEvent(event)
 
-                    # activeGameIndex += 1
+                # activeGameIndex += 1
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
@@ -65,6 +68,11 @@ def main():
                     print(start_time)
                 if event.key == pygame.K_o:
                     globals.activeGameIndex += 1
+                    
+                    if globals.activeGameIndex >= len(screens):
+                        # Completed all the games
+                        won = True
+                        completed = True
 
                     print(start_time)
                 #pass
@@ -72,43 +80,48 @@ def main():
 
         SCREEN.fill(BLACK)
 
-
-        if screens[globals.activeGameIndex] != None:
+        if not completed and globals.activeGameIndex < len(screens) and screens[globals.activeGameIndex] != None:
             output = screens[globals.activeGameIndex].Update(dt)
             screens[globals.activeGameIndex].Render()
 
-            if output != None:
+            if globals.activeGameIndex != 0:
+                counting_time = pygame.time.get_ticks() - start_time
+
+                # change milliseconds into minutes, seconds, milliseconds
+                counting_minutes = str(counting_time//60000)
+                counting_seconds = str( (counting_time%60000)//1000 )
+                #counting_millisecond = str(counting_time%1000).zfill(3)
+                timer_string = "%s:%s" % (counting_minutes, counting_seconds)
+
+                text = get_font(50).render(str(timer_string), 1, (255,255,255))
+                level_text = get_font(50).render(str(globals.activeGameIndex), 1, (255,255,255))
+                SCREEN.blit(text, (10, 10))
+                SCREEN.blit(level_text, (SCREEN_WIDTH//2, 10))
+
+                if int(counting_minutes) > 60:
+                    completed = True
+                    send_data(counting_minutes, globals.activeGameIndex)
+
+            if output != None and output is True:
                 globals.activeGameIndex += 1
 
-        if screens[globals.activeGameIndex] == None:
+                if globals.activeGameIndex >= len(screens):
+                    # Completed all the games
+                    send_data(counting_minutes, globals.activeGameIndex)
+                    won = True
+                    completed = True
+
+        if won:
             SCREEN.fill((0,0,0))
-            gameWonText = get_font(50).render("You Won", 1, (255, 255, 255))
+            gameWonText = get_font(50).render("You Won", True, (255, 255, 255))
+            SCREEN.blit(gameWonText, gameWonText.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)))
+            
+        elif completed:
+            SCREEN.fill((0,0,0))
+            gameOverText = get_font(50).render("Game over, get lost", 1, (255, 255, 255))
             SCREEN.blit(gameOverText, (SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
-            send_data(counting_minutes, globals.activeGameIndex)
 
-
-
-        if globals.activeGameIndex > 0:
-            counting_time = pygame.time.get_ticks() - start_time
-
-            # change milliseconds into minutes, seconds, milliseconds
-            counting_minutes = str(counting_time//60000)
-            counting_seconds = str( (counting_time%60000)//1000 )
-            #counting_millisecond = str(counting_time%1000).zfill(3)
-            timer_string = "%s:%s" % (counting_minutes, counting_seconds)
-
-            text = get_font(50).render(str(timer_string), 1, (255,255,255))
-            level_text = get_font(50).render(str(globals.activeGameIndex), 1, (255,255,255))
-            SCREEN.blit(text, (10, 10))
-            SCREEN.blit(level_text, (SCREEN_WIDTH//2, 10))
-
-            if int(counting_minutes) > 60:
-                SCREEN.fill((0,0,0))
-                gameOverText = get_font(50).render("Game over, get lost", 1, (255, 255, 255))
-                SCREEN.blit(gameOverText, (SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
-                send_data(counting_minutes, globals.activeGameIndex)
-
-        pygame.display.flip()
+        pygame.display.update()
 
 
 if __name__ == "__main__":

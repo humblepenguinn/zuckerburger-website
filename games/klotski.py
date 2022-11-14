@@ -337,8 +337,8 @@ class Board:
     @classmethod
     def from_start_position(cls):
         return cls([Piece1x1(0, 4), Piece1x1(1, 3), Piece1x1(2, 3), Piece1x1(3, 4),
-                    Piece1x2(0, 0), Piece1x2(0, 2), Piece1x2(3, 0), Piece1x2(3, 2),
-                    Piece2x1(1, 2), Piece2x2(1, 0)])
+                    Piece1x1(0, 0), Piece1x1(0, 1), Piece1x2(0, 2), Piece1x1(3, 0), Piece1x1(3, 1), Piece1x2(3, 2),
+                    Piece1x1(1, 2), Piece1x1(2, 2), Piece2x2(1, 0)])
 
     def empty_positions(self):
         # positions: initial store all positions on the board
@@ -509,13 +509,11 @@ class Klotski(Game):
         self.handle_user_event(event)
 
     def Update(self, dt):
-        return None
+        return self.board.is_solved
 
     def Render(self):
         super().Render()
         self.Draw()
-
-        pygame.display.update()
 
         # Power keys while navigating history
         # Allows continuous press
