@@ -1,4 +1,5 @@
 import pygame, pygame.gfxdraw, math, random
+from games import Game
 from settings import *
 import sys
 
@@ -9,7 +10,6 @@ YELLOW = (246, 223, 14)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
-clock = pygame.time.Clock()
 obstacles = list()
 stars = list()
 colorswitches = list()
@@ -17,6 +17,8 @@ MENU, GAMEPLAY, PAUSE, GAMEOVER = range(4)
 gamestate = MENU
 score = 0
 highscore = 0
+
+GRAVITY = 850
 
 pygame.font.init()
 font = pygame.font.Font(pygame.font.get_default_font(), 24)
@@ -30,7 +32,7 @@ class Camera:
 cam = Camera()
 
 class Obstacle:
-    def __init__(self, surface, x=250, y=150, rad=220, angle = 0, vel = 1):
+    def __init__(self, surface, x=250, y=150, rad=220, angle = 0, vel = 150):
         self.x = x
         self.y = y
         self.rad = rad
@@ -39,13 +41,13 @@ class Obstacle:
         self.vel = vel
         self.thickness = 25
 
-    def update(self):
+    def update(self, dt):
         x, y = (self.x-float(self.rad/2)-cam.x, self.y-float(self.rad/2)-cam.y)
         if(y >= SCREEN_HEIGHT):
             obstacles.remove(self)
             print("obstacle was removed")
             return
-        self.angle+=self.vel
+        self.angle+=self.vel * dt
         if(self.angle > 360):
             self.angle-=360
         elif(self.angle <= 0):
@@ -84,9 +86,9 @@ class Star:
         self.dead = False
         self.dead_counter = 0
 
-    def update(self):
+    def update(self, dt):
         if(self.dead and self.dead_counter < 40):
-            self.dead_counter+=1
+            self.dead_counter+=50 * dt
         elif(self.dead):
             stars.remove(self)
 
@@ -148,7 +150,7 @@ class ExplosionBall:
         #self.rad = 3
         self.rad = random.randint(2,5)
         self.surface = surface
-        self.vel = [random.uniform(-20,20),random.uniform(-20,20)]
+        self.vel = [random.uniform(-1000,1000),random.uniform(-1000,1000)]
         self.color = random_color()
 
     def draw(self):
@@ -156,13 +158,13 @@ class ExplosionBall:
         pygame.gfxdraw.aacircle(self.surface, x, y, self.rad, self.color)
         pygame.gfxdraw.filled_circle(self.surface, x, y, self.rad, self.color)
 
-    def update(self):
+    def update(self, dt):
         X,Y = 0,1
-        self.vel[Y] += 0.5
-        self.x += self.vel[X]
+        self.vel[Y] += GRAVITY * dt
+        self.x += self.vel[X] * dt
         if(self.x >= SCREEN_WIDTH or self.x <= 0):
             self.vel[X] = -self.vel[X]
-        self.y += self.vel[Y]
+        self.y += self.vel[Y] * dt
 
 
 class Ball:
@@ -174,7 +176,7 @@ class Ball:
         self.vel = 0
         self.color = random_color()
         self.dead = False
-        self.dead_counter = 0
+        self.dead_counter = 0.0
         self.explosion_balls = []
 
     def collision_detection(self):
@@ -226,23 +228,22 @@ class Ball:
                 colorswitches.remove(cs)
 
     def die(self):
-        self.dying_counter = 0
         self.dead = True
         for i in range(50):
             temp = ExplosionBall(self.surface, self.x, self.y)
             self.explosion_balls.append(temp)
 
-    def update(self):
+    def update(self, dt):
         if(not self.dead):
-            self.vel -= 0.5
-            self.y -= self.vel
+            self.vel -= GRAVITY * dt
+            self.y -= self.vel * dt
             if(cam.y >= self.y-SCREEN_HEIGHT/2):
                 cam.y = self.y-SCREEN_HEIGHT/2
             self.collision_detection()
-        elif(self.dead and self.dead_counter <= 80):
-            self.dead_counter+=1
+        elif(self.dead and self.dead_counter <= 1):
+            self.dead_counter+=dt
             for xball in self.explosion_balls:
-                xball.update()
+                xball.update(dt)
 
         else:
             global score, highscore, gamestate
@@ -258,7 +259,7 @@ class Ball:
         if(not self.dead):
             pygame.gfxdraw.aacircle(self.surface, x, y, self.rad, self.color)
             pygame.gfxdraw.filled_circle(self.surface, x, y, self.rad, self.color)
-        elif(self.dead_counter <= 80):
+        elif(self.dead_counter <= 1):
             dc = self.dead_counter
             #pygame.gfxdraw.aacircle(self.surface, x, y, self.rad-dc, self.color)
             #pygame.gfxdraw.filled_circle(self.surface, x, y, self.rad-dc, self.color)
@@ -306,28 +307,6 @@ def restart(screen):
 
     score = 0
 
-def handle_events(screen):
-    global gamestate
-    for e in pygame.event.get():
-        if(e.type == pygame.QUIT):
-            sys.exit(1)
-        if(e.type == pygame.KEYDOWN):
-            if(e.key == pygame.K_ESCAPE):
-                return False
-            elif(e.key == pygame.K_SPACE):
-                if(gamestate == GAMEPLAY):
-                    ball.vel = 8
-                #elif(gamestate==GAMEPLAY and )
-                elif(gamestate == GAMEOVER):
-                    restart(screen)
-                    gamestate = GAMEPLAY
-                elif(gamestate == MENU):
-                    restart(screen)
-                    gamestate = GAMEPLAY
-    return True
-
-
-
 def draw_menu(screen):
     screen.blit(font.render("P R E S S  S P A C E B A R  T O  C O N T I N U E", True, WHITE), (SCREEN_WIDTH // 2 - 250, SCREEN_HEIGHT // 2))
 
@@ -347,44 +326,58 @@ def draw_ui(screen):
         for i in range(6):
             pygame.draw.line(screen, WHITE, (w*i-20-cam.x, -600*(highscore-1)-cam.y), (w*i+20-cam.x, -600*(highscore-1)-cam.y), 10)
 
-class MainGame:
-    def __init__(self, screen):
-        self.screen = screen
+class MainGame(Game):
+    def __init__(self, main_screen: pygame.Surface, timer: pygame.time.Clock):
+        super().__init__(main_screen, timer)
 
     def OnEvent(self, event):
-        pass
+        global gamestate
+        if(event.type == pygame.QUIT):
+            sys.exit(1)
+        if(event.type == pygame.KEYDOWN):
+            if(event.key == pygame.K_ESCAPE):
+                return False
+            elif(event.key == pygame.K_SPACE):
+                if(gamestate == GAMEPLAY):
+                    ball.vel = 350
+                #elif(gamestate==GAMEPLAY and )
+                elif(gamestate == GAMEOVER):
+                    restart(self.main_screen)
+                    gamestate = GAMEPLAY
+                elif(gamestate == MENU):
+                    restart(self.main_screen)
+                    gamestate = GAMEPLAY
+
     def Render(self):
-        while(handle_events(self.screen)):
-            clock.tick(80)
-            self.screen.fill((20,20,20))
-            if(gamestate == MENU):
-                draw_menu(self.screen)
-            elif(gamestate == GAMEPLAY):
-                for obstacle in obstacles:
-                    obstacle.update()
-                ball.update()
-                for star in stars:
-                    star.update()
+        self.main_screen.fill((20,20,20))
+        if(gamestate == MENU):
+            draw_menu(self.main_screen)
+        elif(gamestate == GAMEPLAY):
 
-                for obstacle in obstacles:
-                    if(obstacle.y+obstacle.rad/2-cam.y >= 0 and obstacle.y-obstacle.rad/2-cam.y <= SCREEN_HEIGHT):
-                        obstacle.draw()
-                for star in stars:
-                    if(star.y+13-cam.y >= 0 and star.y-13-cam.y <= SCREEN_HEIGHT):
-                        star.draw()
-                for cs in colorswitches:
-                    if(cs.y+cs.rad-cam.y >= 0 and cs.y-cs.rad-cam.y <= SCREEN_HEIGHT):
-                        cs.draw(self.screen)
-                ball.draw()
-                draw_ui(self.screen)
 
-            elif(gamestate == GAMEOVER):
-                draw_game_over(self.screen)
+            for obstacle in obstacles:
+                if(obstacle.y+obstacle.rad/2-cam.y >= 0 and obstacle.y-obstacle.rad/2-cam.y <= SCREEN_HEIGHT):
+                    obstacle.draw()
+            for star in stars:
+                if(star.y+13-cam.y >= 0 and star.y-13-cam.y <= SCREEN_HEIGHT):
+                    star.draw()
+            for cs in colorswitches:
+                if(cs.y+cs.rad-cam.y >= 0 and cs.y-cs.rad-cam.y <= SCREEN_HEIGHT):
+                    cs.draw(self.main_screen)
+            ball.draw()
+            draw_ui(self.main_screen)
 
-            pygame.display.flip()
+        elif(gamestate == GAMEOVER):
+            draw_game_over(self.main_screen)
+
 
     def Update(self, dt):
-        pass
+        if gamestate == GAMEPLAY:
+            for obstacle in obstacles:
+                obstacle.update(dt)
+            ball.update(dt)
+            for star in stars:
+                star.update(dt)
 
 
 

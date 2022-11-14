@@ -22,9 +22,9 @@ SCREEN_WIDTH, SCREEN_HEIGHT = SCREEN.get_width(), SCREEN.get_height()
 pygame.display.set_caption("Zuckerburger")
 
 startMenuScreen = StartMenu(SCREEN, clock)
-screens = [Klotski(SCREEN, clock), startMenuScreen, TowerOfHanoi(SCREEN, clock), FindTheHiddenObj(SCREEN, clock), games.color_switch.MainGame(SCREEN), None]
+screens = [Klotski(SCREEN, clock), startMenuScreen, TowerOfHanoi(SCREEN, clock), FindTheHiddenObj(SCREEN, clock), games.color_switch.MainGame(SCREEN, clock), None]
 
-activeGameIndex = 0
+activeGameIndex = 4
 
 
 def main():
@@ -32,7 +32,6 @@ def main():
 
     while True:
         dt = clock.tick(FPS) / 1000  # Amount of seconds between each loop.
-
         startMenuScreen.start_button.changeColor(pygame.mouse.get_pos())
 
         for event in pygame.event.get():

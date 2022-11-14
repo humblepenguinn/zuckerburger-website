@@ -95,20 +95,3 @@ class FindTheHiddenObj(Game):
         """
         for object in self.object_group:
             self.main_screen.blit(object.image, object.rect)
-
-    def main(self):
-        clock = pygame.time.Clock()
-
-        while True:
-            dt = clock.tick(FPS) / 1000  # Amount of seconds between each loop.
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-
-            self.main_screen.fill(BLACK)
-
-            self.Update()
-            self.Render()
-
-            pygame.display.update()
