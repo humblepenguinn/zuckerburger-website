@@ -1,6 +1,12 @@
 import pygame
+import pickle
+import requests
+
+from globals import *
 
 from utils import *
+
+
 
 class StartMenu():
     def __init__(self, main_screen: pygame.Surface, timer: pygame.time.Clock) -> None:
@@ -20,14 +26,28 @@ class StartMenu():
         self.start_button = Button(None, (self.main_screen.get_width() / 2, (self.main_screen.get_height() / 2) + 200), "START", get_font(50), (255, 255, 255), (192, 34, 200))
 
     def OnEvent(self, event: pygame.event.Event):
-
-
         self.hc_input_box.OnEvent(event)
         self.password_input_box.OnEvent(event)
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.start_button.checkForInput(pygame.mouse.get_pos()):
+                dictToSend = {"hcid": str(self.hc_input_box.text), "password": str(self.password_input_box.text) }
+                res = requests.post(f'{baseUrl}/login', json=dictToSend)
+                if res.status_code == 401:
+                    # Unauthorized
+                    pass
+                else:
+                    with open('currentUser', 'wb') as f:
+                        pickle.dump(str(self.hc_input_box.text), f)
+                    activeGameIndex += 1
+                    start_time = pygame.time.get_ticks()
+
+
 
     def Update(self, dt):
         self.hc_input_box.Update(dt)
         self.password_input_box.Update(dt)
+        return 0
 
     def Render(self):
         self.main_screen.fill((0, 0, 0))

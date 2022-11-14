@@ -5,8 +5,11 @@ import pygame
 from games import Game
 from settings import BLACK, FPS
 from utils import get_font
+import globals
 
-AMOUNT_OF_OBJ = 5
+
+
+AMOUNT_OF_OBJ = 10
 HOVER_OBJ_COLOR = (190, 120, 255)
 OBJ_COLOR = (190, 120, 0)
 
@@ -81,6 +84,8 @@ class FindTheHiddenObj(Game):
         for _ in range(AMOUNT_OF_OBJ):
             Object([self.object_group], (random.randint(0, 1280), random.randint(0, 720)), (20, 20), "assets/images/ball.png")
 
+        self.timer_string = None
+        self.counting_time = None
     def Update(self, dt):
         """
         It loops through all the objects in the object group and calls the Update function for each
@@ -89,26 +94,20 @@ class FindTheHiddenObj(Game):
         for object in self.object_group:
             object.Update()
 
+
+
+        if len(self.object_group) == 0:
+            return 10
+        else:
+            return -1
+
+
     def Render(self):
         """
         It takes the image of each object in the object group and blits it to the main screen
         """
+
         for object in self.object_group:
             self.main_screen.blit(object.image, object.rect)
 
-    def main(self):
-        clock = pygame.time.Clock()
 
-        while True:
-            dt = clock.tick(FPS) / 1000  # Amount of seconds between each loop.
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-
-            self.main_screen.fill(BLACK)
-
-            self.Update()
-            self.Render()
-
-            pygame.display.update()

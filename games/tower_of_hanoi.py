@@ -6,6 +6,8 @@ from games import Game
 
 from settings import *
 import sys
+import globals
+
 
 TOWER_HEIGHT = 400
 TOWER_WIDTH = 30
@@ -58,8 +60,7 @@ class Tower:
             tile.Update()
 
         i = len(self.tiles) - 1
-        print("I", i)
-        print(self.x_position)
+
         for tile in self.tiles:
             if not tile.isBeingDragged:
                 tile.UpdatePosition((self.x_position, self.rect.bottom -(i * (TILE_HEIGHT + 10)) ))
@@ -126,15 +127,14 @@ class TowerOfHanoi(Game):
         self.towers = []
         self.tiles = []
         self.currentlyDraggingTile = None
-
-        self.totalTimeRemaining = datetime.timedelta(seconds=5)
-        self.timerText = get_font(100).render("30:00", True, (255, 255, 255))
-        self.timerTextRect = self.timerText.get_rect(center=(100, 50))
+        self.score = 10
         self.started = False
 
         self.gameOver = False
         self.won = False
         self.numOfMovesTaken = 0
+
+        self.timer_string = None
 
         # Some calculations for where to position the 3 towers
         difference = (self.width - 100) / 3
@@ -215,10 +215,6 @@ class TowerOfHanoi(Game):
             tower.OnEvent(event)
 
     def GetCurrentGameState(self):
-        # Check if you have time remaining
-        if self.totalTimeRemaining <= datetime.timedelta(0):
-            return True, False
-
         # Check in the second and third tower
         # if either of them have all the tiles on them
         # If they do, game won
@@ -238,9 +234,13 @@ class TowerOfHanoi(Game):
         # GetCurrentGameState returns a tuple
         # with 2 bools, game over and game won
         (gameOver, gameWon) = self.GetCurrentGameState()
+        #print(gameOver, gameWon)
+
+        if self.numOfMovesTaken > 7:
+            self.score -= 1
 
         # If game is over, return out of the functions
-        if gameOver and not self.gameOver:
+        if gameOver:
             self.gameOver = True
             self.won = gameWon
 
@@ -248,27 +248,18 @@ class TowerOfHanoi(Game):
                 self.currentlyDraggingTile.isBeingDragged = False
                 self.currentlyDraggingTile = None
 
-            return self.gameOver, self.won, self.numOfMovesTaken
+            return self.numOfMovesTaken
 
-        if self.started:
-            # Decrease our time remaining each frame
-            self.totalTimeRemaining -= datetime.timedelta(milliseconds=self.timer.get_time())
 
-            # Makes sure that even if the time remaining goes below 0, it will still display 0 on our text
-            if self.totalTimeRemaining <= datetime.timedelta(0):
-                self.totalTimeRemaining = datetime.timedelta(0)
-
-            # Render the time remaining text with some formatting
-            self.timerText = get_font(100).render(str(self.totalTimeRemaining)[2:7], True, (255, 255, 255))
 
         if self.currentlyDraggingTile != None:
             self.currentlyDraggingTile.UpdatePosition(pygame.mouse.get_pos())
 
-        return False, False, self.numOfMovesTaken
+
+
+        return None
 
     def Render(self):
-        # Renders the timer text to the screen
-        self.main_screen.blit(self.timerText, self.timerTextRect)
 
         # Renders all 3 towers and each of its tiles
         for tower in self.towers:
@@ -277,6 +268,8 @@ class TowerOfHanoi(Game):
         # Separate rendering for tile being dragged
         if self.currentlyDraggingTile != None:
             self.currentlyDraggingTile.Render()
+
+
 
     def main(self):
         clock = pygame.time.Clock()

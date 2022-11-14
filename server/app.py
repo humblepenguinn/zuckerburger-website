@@ -5,7 +5,7 @@ from flask_session import Session
 from flask_cors import CORS
 
 from models import db, User
-from config import ApplicationConfig
+from globals import ApplicationConfig
 
 app = Flask(__name__)
 app.config.from_object(ApplicationConfig)
@@ -62,6 +62,13 @@ def login():
         return jsonify({"error": "Unauthorized"}), 401
 
     return jsonify({"id": user.id, "hcid": user.hcid})
+
+@app.route("/add-timer", methods=["POST"])
+def add_timer():
+    pass
+
+@app.route("/add-points", methods=["POST"])
+def login():
 
 
 if __name__ == "__main__":
