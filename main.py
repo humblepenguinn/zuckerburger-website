@@ -1,8 +1,9 @@
 
+import pickle
 import globals
 import pygame
 import requests
-import pickle
+
 
 from utils import *
 from settings import *
@@ -29,8 +30,20 @@ screens = [startMenuScreen, TowerOfHanoi(SCREEN, clock), Klotski(SCREEN, clock),
 
 globals.initialize()
 
+def send_data(time, puzzle_level):
+    user = None
+    with open('currentUser', 'rb') as f:
+        user = pickle.load(f)
+
+    dictToSend = {"hcid": str(user), 'time': str(time), 'puzzle_level': str(puzzle_level)}
+    if res.status_code == 401:
+        # Unauthorized
+        pass
+    res = requests.post(f'{baseUrl}/add-shit', json=dictToSend)
+
 def main():
     start_time=0
+    counting_minutes=0
     while True:
         dt = clock.tick(FPS) / 1000  # Amount of seconds between each loop.
 
@@ -62,23 +75,17 @@ def main():
 
         if screens[globals.activeGameIndex] != None:
             output = screens[globals.activeGameIndex].Update(dt)
-
-
-            if output is not None:
-                if globals.activeGameIndex == 1: # tower of hanoi
-                    globals.score += (10 - (output - 7))
-                    print(globals.score)
-                    globals.activeGameIndex += 1
-
-                if globals.activeGameIndex == 4: # color switch we directly add the score no need for no of moves
-                    globals.activeGameIndex += 1
-                    globals.score += output
-
-
             screens[globals.activeGameIndex].Render()
 
+            if output != None:
+                globals.activeGameIndex += 1
+
         if screens[globals.activeGameIndex] == None:
-            requests.post(f'{baseUrl}/logout')
+            SCREEN.fill((0,0,0))
+            gameWonText = get_font(50).render("You Won", 1, (255, 255, 255))
+            SCREEN.blit(gameOverText, (SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
+            send_data(counting_minutes, globals.activeGameIndex)
+
 
 
         if globals.activeGameIndex > 0:
@@ -88,15 +95,18 @@ def main():
             counting_minutes = str(counting_time//60000)
             counting_seconds = str( (counting_time%60000)//1000 )
             #counting_millisecond = str(counting_time%1000).zfill(3)
-
             timer_string = "%s:%s" % (counting_minutes, counting_seconds)
 
             text = get_font(50).render(str(timer_string), 1, (255,255,255))
-            score_text = get_font(50).render(str(globals.score), 1, (255,255,255))
             level_text = get_font(50).render(str(globals.activeGameIndex), 1, (255,255,255))
             SCREEN.blit(text, (10, 10))
-            SCREEN.blit(score_text, (1280-100, 10))
-            SCREEN.blit(level_text, (1280//2, 10))
+            SCREEN.blit(level_text, (SCREEN_WIDTH//2, 10))
+
+            if int(counting_minutes) > 60:
+                SCREEN.fill((0,0,0))
+                gameOverText = get_font(50).render("Game over, get lost", 1, (255, 255, 255))
+                SCREEN.blit(gameOverText, (SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
+                send_data(counting_minutes, globals.activeGameIndex)
 
         pygame.display.flip()
 

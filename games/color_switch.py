@@ -336,7 +336,7 @@ class MainGame(Game):
     def __init__(self, main_screen: pygame.Surface, timer: pygame.time.Clock):
         super().__init__(main_screen, timer)
         self.timer_string = None
-        self.tries = 0
+        
 
     def OnEvent(self, event):
         global gamestate
@@ -382,7 +382,7 @@ class MainGame(Game):
 
         elif(gamestate == GAMEOVER):
             draw_game_over(self.main_screen)
-            self.tries += 1
+
 
 
 
@@ -392,10 +392,9 @@ class MainGame(Game):
     def Update(self, dt):
 
         if (gamestate == WON):
-            return 10
-            
-        if self.tries > 2:
-            return 0
+            return True
+
+
 
         if gamestate == GAMEPLAY:
             for obstacle in obstacles:

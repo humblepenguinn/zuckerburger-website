@@ -113,7 +113,8 @@ class Tile:
             self.color = TILE_COLOR
 
     def Render(self):
-        pygame.draw.rect(self.main_screen, self.color, self.rect)
+        if self.rect is not None:
+            pygame.draw.rect(self.main_screen, self.color, self.rect)
         #self.main_screen.blit(self.image, self.rect)
 
 
@@ -248,7 +249,7 @@ class TowerOfHanoi(Game):
                 self.currentlyDraggingTile.isBeingDragged = False
                 self.currentlyDraggingTile = None
 
-            return self.numOfMovesTaken
+            return True
 
 
 

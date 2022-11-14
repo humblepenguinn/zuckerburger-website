@@ -47,7 +47,7 @@ class StartMenu():
     def Update(self, dt):
         self.hc_input_box.Update(dt)
         self.password_input_box.Update(dt)
-        return 0
+        return None
 
     def Render(self):
         self.main_screen.fill((0, 0, 0))

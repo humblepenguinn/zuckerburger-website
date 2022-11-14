@@ -509,12 +509,12 @@ class Klotski(Game):
         self.handle_user_event(event)
 
     def Update(self, dt):
-        return 0
+        return None
 
     def Render(self):
         super().Render()
         self.Draw()
-    
+
         pygame.display.update()
 
         # Power keys while navigating history
