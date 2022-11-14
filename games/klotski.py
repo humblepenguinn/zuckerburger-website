@@ -482,8 +482,6 @@ class Klotski(Game):
         # Reset the solver as well
 
     def handle_user_event(self, _event):
-        if _event.type != pygame.MOUSEMOTION:
-            print ("Handling event start!", _event)
 
         if _event.type == pygame.KEYDOWN:
             # Board reset
@@ -501,9 +499,6 @@ class Klotski(Game):
 
         if _event.type == pygame.MOUSEBUTTONUP and _event.button == 1:  # left click
             self.handle_drop(_event.pos)
-
-        if _event.type != pygame.MOUSEMOTION:
-            print ("Handling event end!", _event)
 
  
     def OnEvent(self, event: pygame.event.Event):
