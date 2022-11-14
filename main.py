@@ -39,7 +39,7 @@ def send_data(time, puzzle_level):
     if res.status_code == 401:
         # Unauthorized
         pass
-    res = requests.post(f'{baseUrl}/add-shit', json=dictToSend)
+    res = requests.post(f'{base_url}/add-shit', json=dictToSend)
 
 def main():
     start_time=0
