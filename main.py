@@ -39,17 +39,9 @@ def main():
             if event.type == pygame.QUIT:
                 return
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if startMenuScreen.start_button.checkForInput(pygame.mouse.get_pos()):
-                    dictToSend = {"hcid": str(startMenuScreen.hc_input_box.text), "password": str(startMenuScreen.password_input_box.text) }
-                    res = requests.post(f'{baseUrl}/login', json=dictToSend)
-                    if res.status_code == 401:
-                        # Unauthorized
-                        pass
-                    else:
-                        with open('currentUser', 'wb') as f:
-                            pickle.dump(str(startMenuScreen.hc_input_box.text), f)
-                        activeGameIndex += 1
+            if screens[activeGameIndex] != None:
+                screens[activeGameIndex].OnEvent(event)
+
                     # activeGameIndex += 1
 
             if event.type == pygame.KEYDOWN:
@@ -57,8 +49,6 @@ def main():
                     activeGameIndex += 1
                 #pass
 
-            if screens[activeGameIndex] != None:
-                screens[activeGameIndex].OnEvent(event)
 
         SCREEN.fill(BLACK)
 
@@ -69,7 +59,7 @@ def main():
         if screens[activeGameIndex] == None:
             requests.post(f'{baseUrl}/logout')
 
-        pygame.display.update()
+        pygame.display.flip()
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,7 @@
 from collections import namedtuple
 
 from games import Game
+from settings import *
 
 import pygame
 
@@ -15,7 +16,7 @@ MARGIN = int(TILE_SIZE * 0.1)
 WIDTH, HEIGHT = 4 * TILE_SIZE + 2 * MARGIN, 5 * TILE_SIZE + 2 * MARGIN + 4 * FONT_HEIGHT
 
 # Board positions
-BOARD_OFFSETS = MARGIN, MARGIN + 2 * FONT_HEIGHT
+BOARD_OFFSETS = (SCREEN_WIDTH / 2) - 2 * TILE_SIZE, (SCREEN_HEIGHT / 2) - 2.5 * TILE_SIZE
 BOARD_SIZE = 4 * TILE_SIZE, 5 * TILE_SIZE
 
 # Score card positions
@@ -23,7 +24,7 @@ SCORE_OFFSETS = 0, HEIGHT - 2 * FONT_HEIGHT
 SCORE_SIZE = WIDTH, 2 * FONT_HEIGHT
 
 # Title positions
-TITLE_OFFSETS = 0, 0
+TITLE_OFFSETS = BOARD_OFFSETS[0], BOARD_OFFSETS[1] - FONT_HEIGHT
 TITLE_SIZE = WIDTH, 2 * FONT_HEIGHT
 
 def darken_color(color, factor):
@@ -428,18 +429,18 @@ class Klotski(Game):
         self.board_surf.fill(board_color)
 
         # Draw the title label onto the window
-        pygame.draw.rect(self.main_screen, text_background, (TITLE_OFFSETS, TITLE_SIZE))
-        title_label = main_font.render(f"KLOTSKI PUZZLE", 1, text_color)
-        self.main_screen.blit(title_label,
-                 (TITLE_OFFSETS[0] + TITLE_SIZE[0] // 2 - title_label.get_width() // 2,
-                  TITLE_OFFSETS[1] + TITLE_SIZE[1] // 2 - title_label.get_height() // 2))
+        # pygame.draw.rect(self.main_screen, text_background, (TITLE_OFFSETS, TITLE_SIZE))
+        # title_label = main_font.render(f"KLOTSKI PUZZLE", 1, text_color)
+        # self.main_screen.blit(title_label,
+        #          (TITLE_OFFSETS[0] + TITLE_SIZE[0] // 2 - title_label.get_width() // 2,
+        #           TITLE_OFFSETS[1] + TITLE_SIZE[1] // 2 - title_label.get_height() // 2))
 
         # Draw the steps label onto the window
-        pygame.draw.rect(self.main_screen, text_background, (SCORE_OFFSETS, SCORE_SIZE))
-        steps_label = main_font.render(f"Step {self.board.number_of_steps}", 1, text_color)
-        self.main_screen.blit(steps_label,
-                 (SCORE_OFFSETS[0] + SCORE_SIZE[0] // 2 - steps_label.get_width() // 2,
-                  SCORE_OFFSETS[1] + SCORE_SIZE[1] // 2 - steps_label.get_height() // 2))
+        # pygame.draw.rect(self.main_screen, text_background, (SCORE_OFFSETS, SCORE_SIZE))
+        # steps_label = main_font.render(f"Step {self.board.number_of_steps}", 1, text_color)
+        # self.main_screen.blit(steps_label,
+        #         (SCORE_OFFSETS[0] + SCORE_SIZE[0] // 2 - steps_label.get_width() // 2,
+        #          SCORE_OFFSETS[1] + SCORE_SIZE[1] // 2 - steps_label.get_height() // 2))
 
         # Draw the board and copy it onto the window
         self.board.draw(self.board_surf, TILE_SIZE)
@@ -481,6 +482,9 @@ class Klotski(Game):
         # Reset the solver as well
 
     def handle_user_event(self, _event):
+        if _event.type != pygame.MOUSEMOTION:
+            print ("Handling event start!", _event)
+
         if _event.type == pygame.KEYDOWN:
             # Board reset
             if _event.key == pygame.K_r:
@@ -498,6 +502,10 @@ class Klotski(Game):
         if _event.type == pygame.MOUSEBUTTONUP and _event.button == 1:  # left click
             self.handle_drop(_event.pos)
 
+        if _event.type != pygame.MOUSEMOTION:
+            print ("Handling event end!", _event)
+
+ 
     def OnEvent(self, event: pygame.event.Event):
         super().OnEvent(event)
         self.handle_user_event(event)

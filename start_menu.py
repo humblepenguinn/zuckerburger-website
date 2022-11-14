@@ -1,4 +1,8 @@
 import pygame
+import pickle
+import requests
+
+from globals import *
 
 from utils import *
 
@@ -24,6 +28,18 @@ class StartMenu():
 
         self.hc_input_box.OnEvent(event)
         self.password_input_box.OnEvent(event)
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.start_button.checkForInput(pygame.mouse.get_pos()):
+                dictToSend = {"hcid": str(self.hc_input_box.text), "password": str(self.password_input_box.text) }
+                res = requests.post(f'{baseUrl}/login', json=dictToSend)
+                if res.status_code == 401:
+                    # Unauthorized
+                    pass
+                else:
+                    with open('currentUser', 'wb') as f:
+                        pickle.dump(str(self.hc_input_box.text), f)
+                    activeGameIndex += 1
 
     def Update(self, dt):
         self.hc_input_box.Update(dt)
