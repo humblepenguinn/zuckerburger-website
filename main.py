@@ -1,4 +1,5 @@
 import pickle
+from games.tetris import Tetris
 import globals
 import pygame
 import requests
@@ -24,7 +25,7 @@ SCREEN_WIDTH, SCREEN_HEIGHT = SCREEN.get_width(), SCREEN.get_height()
 pygame.display.set_caption("Zuckerburger")
 
 startMenuScreen = StartMenu(SCREEN, clock)
-screens = [startMenuScreen, TowerOfHanoi(SCREEN, clock), Klotski(SCREEN, clock), FindTheHiddenObj(SCREEN, clock), games.color_switch.MainGame(SCREEN, clock)]
+screens = [Tetris(SCREEN, clock), startMenuScreen, TowerOfHanoi(SCREEN, clock), Klotski(SCREEN, clock), FindTheHiddenObj(SCREEN, clock), games.color_switch.MainGame(SCREEN, clock)]
 
 globals.initialize()
 
@@ -36,10 +37,11 @@ def send_data(time, puzzle_level):
         user = pickle.load(f)
 
     dictToSend = {"hcid": str(user), 'time': str(time), 'puzzle_level': str(puzzle_level)}
+    res = requests.post(f'{base_url}/add-shit', json=dictToSend)
     if res.status_code == 401:
         # Unauthorized
         pass
-    res = requests.post(f'{base_url}/add-shit', json=dictToSend)
+
 
 def main():
     start_time=0
@@ -68,7 +70,7 @@ def main():
                     print(start_time)
                 if event.key == pygame.K_o:
                     globals.activeGameIndex += 1
-                    
+
                     if globals.activeGameIndex >= len(screens):
                         # Completed all the games
                         won = True
@@ -115,7 +117,7 @@ def main():
             SCREEN.fill((0,0,0))
             gameWonText = get_font(50).render("You Won", True, (255, 255, 255))
             SCREEN.blit(gameWonText, gameWonText.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)))
-            
+
         elif completed:
             SCREEN.fill((0,0,0))
             gameOverText = get_font(50).render("Game over, get lost", 1, (255, 255, 255))

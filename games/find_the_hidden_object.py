@@ -54,6 +54,8 @@ class Object(pygame.sprite.Sprite):
         """
         self.isMouseHovering()
 
+
+
 class FindTheHiddenObj(Game):
     def __init__(self, main_screen: pygame.Surface, timer: pygame.time.Clock) -> None:
         """
@@ -93,13 +95,17 @@ class FindTheHiddenObj(Game):
         """
         for object in self.object_group:
             object.Update()
+            position = pygame.mouse.get_pos()
+            if position[0] in range(object.rect.left, object.rect.right) and position[1] in range(object.rect.top, object.rect.bottom):
+                object.kill()
 
 
 
         if len(self.object_group) == 0:
-            return 10
+            return True
         else:
-            return -1
+            return None
+
 
 
     def Render(self):
@@ -109,5 +115,7 @@ class FindTheHiddenObj(Game):
 
         for object in self.object_group:
             self.main_screen.blit(object.image, object.rect)
+
+
 
 

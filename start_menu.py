@@ -2,6 +2,7 @@ import pygame
 import pickle
 import requests
 
+import globals
 from globals import *
 
 from utils import *
@@ -39,8 +40,8 @@ class StartMenu():
                 else:
                     with open('currentUser', 'wb') as f:
                         pickle.dump(str(self.hc_input_box.text), f)
-                    activeGameIndex += 1
-                    start_time = pygame.time.get_ticks()
+                    globals.activeGameIndex += 1
+
 
 
 

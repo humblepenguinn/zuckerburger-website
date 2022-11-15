@@ -36,7 +36,7 @@ def register_user():
         return jsonify({"error": "User already exists"}), 409
 
     hashed_password = bcrypt.generate_password_hash(password)
-    new_user = User(hcid=hcid, password=hashed_password, current_game="1", score="0", total_time_taken="0")
+    new_user = User(hcid=hcid, password=hashed_password, time='0', puzzle_level='0')
 
     db.session.add(new_user)
     db.session.commit()
@@ -63,9 +63,6 @@ def login():
 
     return jsonify({"id": user.id, "hcid": user.hcid})
 
-@app.route("/add-timer", methods=["POST"])
-def add_timer():
-    pass
 
 # {"hcid": str(user), 'time': str(time), 'puzzle_level': str(puzzle_level)}
 @app.route("/add-shit", methods=["POST"])
