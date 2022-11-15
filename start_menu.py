@@ -7,8 +7,6 @@ from globals import *
 
 from utils import *
 
-
-
 class StartMenu():
     def __init__(self, main_screen: pygame.Surface, timer: pygame.time.Clock) -> None:
         self.main_screen = main_screen

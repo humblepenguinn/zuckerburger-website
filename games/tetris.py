@@ -1,6 +1,9 @@
 import random
 import pygame
 
+from settings import *
+from games import Game
+
 """
 10 x 20 grid
 play_height = 2 * play_width
@@ -21,18 +24,17 @@ pygame.font.init()
 
 col = 10  # 10 columns
 row = 20  # 20 rows
-s_width = 800  # window width
-s_height = 750  # window height
+
 play_width = 300  # play window width; 300/10 = 30 width per block
 play_height = 600  # play window height; 600/20 = 20 height per block
 block_size = 30  # size of block
 
-top_left_x = (s_width - play_width) // 2
-top_left_y = s_height - play_height - 50
+top_left_x = (SCREEN_WIDTH - play_width) // 2
+top_left_y = SCREEN_HEIGHT - play_height - 50
 
-filepath = '/Users/rajat/PycharmProjects/Tetris/highscore.txt'
-fontpath = '/Users/rajat/PycharmProjects/Tetris/arcade.ttf'
-fontpath_mario = '/Users/rajat/PycharmProjects/Tetris/mario.ttf'
+filepath = 'assets/high_scores.ttf'
+fontpath = 'assets/fonts/ARCADE_N.TTF'
+fontpath_mario = 'assets/fonts/SuperMario.ttf'
 
 # shapes formats
 
@@ -302,7 +304,7 @@ def draw_next_shape(piece, surface):
 
 
 # draws the content of the window
-def draw_window(surface, grid, score=0, last_score=0):
+def draw_window(surface: pygame.Surface, grid, score=0, last_score=0):
     surface.fill((0, 0, 0))  # fill the surface with black
 
     pygame.font.init()  # initialise font
@@ -367,127 +369,110 @@ def get_max_score():
     return score
 
 
-def main(window):
-    locked_positions = {}
-    create_grid(locked_positions)
+class Tetris(Game):
+    def __init__(self, main_screen: pygame.Surface, timer: pygame.time.Clock):
+        super().__init__(main_screen, timer)
+        self.run = False
+        self.locked_positions = {}
+        create_grid(self.locked_positions)
 
-    change_piece = False
-    run = True
-    current_piece = get_shape()
-    next_piece = get_shape()
-    clock = pygame.time.Clock()
-    fall_time = 0
-    fall_speed = 0.35
-    level_time = 0
-    score = 0
-    last_score = get_max_score()
+        self.change_piece = False
+        self.current_piece = get_shape()
+        self.next_piece = get_shape()
+        self.fall_time = 0
+        self.fall_speed = 0.35
+        self.level_time = 0
+        self.score = 0
+        self.last_score = get_max_score()
 
-    while run:
+    def OnEvent(self, event: pygame.event.Event):
+        super().OnEvent(event)
+
+        if event.type == pygame.KEYDOWN:
+            self.grid = create_grid(self.locked_positions)
+
+            if event.key == pygame.K_SPACE:
+                self.grid = create_grid(self.locked_positions)
+                self.run = True
+
+            if event.key == pygame.K_LEFT:
+                self.current_piece.x -= 1  # move x position left
+                if not valid_space(self.current_piece, self.grid):
+                    self.current_piece.x += 1
+
+            elif event.key == pygame.K_RIGHT:
+                self.current_piece.x += 1  # move x position right
+                if not valid_space(self.current_piece, self.grid):
+                    self.current_piece.x -= 1
+
+            elif event.key == pygame.K_DOWN:
+                # move shape down
+                self.current_piece.y += 1
+                if not valid_space(self.current_piece, self.grid):
+                    self.current_piece.y -= 1
+
+            elif event.key == pygame.K_UP:
+                # rotate shape
+                self.current_piece.rotation = self.current_piece.rotation + 1 % len(self.current_piece.shape)
+                if not valid_space(self.current_piece, self.grid):
+                    self.current_piece.rotation = self.current_piece.rotation - 1 % len(self.current_piece.shape)
+
+    def Render(self):
+        super().Render()
+
+        if not self.run:
+            draw_text_middle('Press any key to begin', 50, (255, 255, 255), self.main_screen)
+            return
+
+        draw_window(self.main_screen, self.grid, self.score, self.last_score)
+        draw_next_shape(self.next_piece, self.main_screen)
+
+    def Update(self, dt):
+        super().Update(dt)
+
         # need to constantly make new grid as locked positions always change
-        grid = create_grid(locked_positions)
+        self.grid = create_grid(self.locked_positions)
 
         # helps run the same on every computer
         # add time since last tick() to fall_time
-        fall_time += clock.get_rawtime()  # returns in milliseconds
-        level_time += clock.get_rawtime()
+        self.fall_time += self.timer.get_rawtime()  # returns in milliseconds
+        self.level_time += self.timer.get_rawtime()
 
-        clock.tick()  # updates clock
+        if self.level_time/1000 > 5:    # make the difficulty harder every 10 seconds
+            self.level_time = 0
+            if self.fall_speed > 0.15:   # until fall speed is 0.15
+                self.fall_speed -= 0.005
 
-        if level_time/1000 > 5:    # make the difficulty harder every 10 seconds
-            level_time = 0
-            if fall_speed > 0.15:   # until fall speed is 0.15
-                fall_speed -= 0.005
-
-        if fall_time / 1000 > fall_speed:
-            fall_time = 0
-            current_piece.y += 1
-            if not valid_space(current_piece, grid) and current_piece.y > 0:
-                current_piece.y -= 1
+        if self.fall_time / 1000 > self.fall_speed:
+            self.fall_time = 0
+            self.current_piece.y += 1
+            if not valid_space(self.current_piece, self.grid) and self.current_piece.y > 0:
+                self.current_piece.y -= 1
                 # since only checking for down - either reached bottom or hit another piece
                 # need to lock the piece position
                 # need to generate new piece
-                change_piece = True
+                self.change_piece = True
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-                pygame.display.quit()
-                quit()
-
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    current_piece.x -= 1  # move x position left
-                    if not valid_space(current_piece, grid):
-                        current_piece.x += 1
-
-                elif event.key == pygame.K_RIGHT:
-                    current_piece.x += 1  # move x position right
-                    if not valid_space(current_piece, grid):
-                        current_piece.x -= 1
-
-                elif event.key == pygame.K_DOWN:
-                    # move shape down
-                    current_piece.y += 1
-                    if not valid_space(current_piece, grid):
-                        current_piece.y -= 1
-
-                elif event.key == pygame.K_UP:
-                    # rotate shape
-                    current_piece.rotation = current_piece.rotation + 1 % len(current_piece.shape)
-                    if not valid_space(current_piece, grid):
-                        current_piece.rotation = current_piece.rotation - 1 % len(current_piece.shape)
-
-        piece_pos = convert_shape_format(current_piece)
+        piece_pos = convert_shape_format(self.current_piece)
 
         # draw the piece on the grid by giving color in the piece locations
         for i in range(len(piece_pos)):
             x, y = piece_pos[i]
             if y >= 0:
-                grid[y][x] = current_piece.color
+                self.grid[y][x] = self.current_piece.color
 
-        if change_piece:  # if the piece is locked
+        if self.change_piece:  # if the piece is locked
             for pos in piece_pos:
                 p = (pos[0], pos[1])
-                locked_positions[p] = current_piece.color       # add the key and value in the dictionary
-            current_piece = next_piece
-            next_piece = get_shape()
-            change_piece = False
-            score += clear_rows(grid, locked_positions) * 10    # increment score by 10 for every row cleared
-            update_score(score)
+                self.locked_positions[p] = self.current_piece.color       # add the key and value in the dictionary
+            self.current_piece = self.next_piece
+            self.next_piece = get_shape()
+            self.change_piece = False
+            self.score += clear_rows(self.grid, self.locked_positions) * 10    # increment score by 10 for every row cleared
+            update_score(self.score)
 
-            if last_score < score:
-                last_score = score
+            if self.last_score < self.score:
+                self.last_score = self.score
 
-        draw_window(window, grid, score, last_score)
-        draw_next_shape(next_piece, window)
-        pygame.display.update()
-
-        if check_lost(locked_positions):
-            run = False
-
-    draw_text_middle('You Lost', 40, (255, 255, 255), window)
-    pygame.display.update()
-    pygame.time.delay(2000)  # wait for 2 seconds
-    pygame.quit()
-
-
-def main_menu(window):
-    run = True
-    while run:
-        draw_text_middle('Press any key to begin', 50, (255, 255, 255), window)
-        pygame.display.update()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-            elif event.type == pygame.KEYDOWN:
-                main(window)
-
-    pygame.quit()
-
-
-if __name__ == '__main__':
-    win = pygame.display.set_mode((s_width, s_height))
-    pygame.display.set_caption('Tetris')
-
-    main_menu(win)  # start game
+        if check_lost(self.locked_positions):
+            self.run = False
