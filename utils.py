@@ -76,7 +76,7 @@ class InputBox():
 	def Update(self, dt):
 		self.SetMouseHover(self.boundingRect.collidepoint(pygame.mouse.get_pos()))
 
-		self.bg_alpha = lerp(self.bg_alpha, self.bg_alpha_target, max(1.0, min(0.0, dt * 10)))
+		self.bg_alpha = lerp(self.bg_alpha, self.bg_alpha_target, clamp(dt * 10, 0.0, 1.0))
 
 	def Render(self, screen: pygame.Surface):
 		if datetime.datetime.now() >= self.nextBlink:
@@ -121,6 +121,9 @@ class Button():
 		else:
 			self.text = self.font.render(self.text_input, True, self.base_color)
         
+def clamp(n, smallest, largest):
+    return max(smallest, min(n, largest))
+
 def lerp(a: float, b: float, f: float):
     return a * (1.0 - f) + (b * f)
 	

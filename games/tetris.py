@@ -228,11 +228,11 @@ def get_shape():
 
 
 # draws text in the middle
-def draw_text_middle(text, size, color, surface):
+def draw_text_middle(text, size, color, surface, offset=(0,0)):
     font = pygame.font.Font(fontpath, size, bold=False, italic=True)
     label = font.render(text, 1, color)
 
-    surface.blit(label, (top_left_x + play_width/2 - (label.get_width()/2), top_left_y + play_height/2 - (label.get_height()/2)))
+    surface.blit(label, label.get_rect(center=((SCREEN_WIDTH/2) + offset[0], (SCREEN_HEIGHT/2) + offset[1])))
 
 
 # draws the lines of the grid for the game
@@ -372,7 +372,12 @@ def get_max_score():
 class Tetris(Game):
     def __init__(self, main_screen: pygame.Surface, timer: pygame.time.Clock):
         super().__init__(main_screen, timer)
+        self.Restart()
+
+
+    def Restart(self):
         self.run = False
+        self.lost = False
         self.locked_positions = {}
         create_grid(self.locked_positions)
 
@@ -421,7 +426,13 @@ class Tetris(Game):
         super().Render()
 
         if not self.run:
-            draw_text_middle('Press any key to begin', 50, (255, 255, 255), self.main_screen)
+
+            if self.lost:
+                draw_text_middle('You Lost', 50, (255, 255, 255), self.main_screen, (0, -100))
+                draw_text_middle('Press any key to try again', 30, (255, 255, 255), self.main_screen)
+            else:
+                draw_text_middle('Press any key to begin', 50, (255, 255, 255), self.main_screen)
+
             return
 
         draw_window(self.main_screen, self.grid, self.score, self.last_score)
@@ -475,4 +486,7 @@ class Tetris(Game):
                 self.last_score = self.score
 
         if check_lost(self.locked_positions):
-            self.run = False
+            # Lost, restart the game
+            self.Restart()
+            self.lost = True
+

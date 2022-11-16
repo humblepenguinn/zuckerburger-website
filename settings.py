@@ -7,4 +7,5 @@ FPS = 240
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+BASE_URL = 'http://192.168.18.183:5000/'
