@@ -25,10 +25,9 @@ highscore = 0
 
 GRAVITY = 850
 
-
 pygame.font.init()
-font = pygame.font.Font(pygame.font.get_default_font(), 24)
-menu_font = pygame.font.Font(pygame.font.get_default_font(), 60)
+font = pygame.font.SysFont('arial', 24)
+menu_font = pygame.font.SysFont('arial', 60)
 
 class Camera:
     def __init__(self):
@@ -336,7 +335,7 @@ class MainGame(Game):
     def __init__(self, main_screen: pygame.Surface, timer: pygame.time.Clock):
         super().__init__(main_screen, timer)
         self.timer_string = None
-        
+
 
     def OnEvent(self, event):
         global gamestate
