@@ -76,7 +76,7 @@ class InputBox():
 	def Update(self, dt):
 		self.SetMouseHover(self.boundingRect.collidepoint(pygame.mouse.get_pos()))
 
-		self.bg_alpha = lerp(self.bg_alpha, self.bg_alpha_target, dt * 10)
+		self.bg_alpha = lerp(self.bg_alpha, self.bg_alpha_target, max(1.0, min(0.0, dt * 10)))
 
 	def Render(self, screen: pygame.Surface):
 		if datetime.datetime.now() >= self.nextBlink:
