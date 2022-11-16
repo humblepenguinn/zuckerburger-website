@@ -4,7 +4,6 @@ import globals
 import pygame
 import requests
 
-
 from utils import *
 from settings import *
 from globals import *
@@ -16,6 +15,8 @@ from games.klotski import *
 import games.color_switch
 from start_menu import StartMenu
 
+from datetime import datetime
+
 clock = pygame.time.Clock()
 
 pygame.init()
@@ -25,7 +26,7 @@ SCREEN_WIDTH, SCREEN_HEIGHT = SCREEN.get_width(), SCREEN.get_height()
 pygame.display.set_caption("Zuckerburger")
 
 startMenuScreen = StartMenu(SCREEN, clock)
-screens = [Tetris(SCREEN, clock), startMenuScreen, TowerOfHanoi(SCREEN, clock), Klotski(SCREEN, clock), FindTheHiddenObj(SCREEN, clock), games.color_switch.MainGame(SCREEN, clock)]
+screens = [startMenuScreen, Tetris(SCREEN, clock), TowerOfHanoi(SCREEN, clock), Klotski(SCREEN, clock), FindTheHiddenObj(SCREEN, clock), games.color_switch.MainGame(SCREEN, clock)]
 
 globals.initialize()
 
@@ -44,8 +45,7 @@ def send_data(time, puzzle_level):
 
 
 def main():
-    start_time=0
-    counting_minutes=0
+    start_time = datetime.now()
     won = False
     completed = False
 
@@ -66,7 +66,7 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
                     globals.activeGameIndex += 1
-                    start_time = pygame.time.get_ticks()
+                    start_time = datetime.now()
                     print(start_time)
                 if event.key == pygame.K_o:
                     globals.activeGameIndex += 1
@@ -87,29 +87,23 @@ def main():
             screens[globals.activeGameIndex].Render()
 
             if globals.activeGameIndex != 0:
-                counting_time = pygame.time.get_ticks() - start_time
+                time_taken = datetime.now() - start_time
 
-                # change milliseconds into minutes, seconds, milliseconds
-                counting_minutes = str(counting_time//60000)
-                counting_seconds = str( (counting_time%60000)//1000 )
-                #counting_millisecond = str(counting_time%1000).zfill(3)
-                timer_string = "%s:%s" % (counting_minutes, counting_seconds)
-
-                text = get_font(50).render(str(timer_string), 1, (255,255,255))
+                text = get_font(50).render(str(time_taken)[2:7], 1, (255,255,255))
                 level_text = get_font(50).render(str(globals.activeGameIndex), 1, (255,255,255))
                 SCREEN.blit(text, (10, 10))
                 SCREEN.blit(level_text, (SCREEN_WIDTH//2, 10))
 
-                if int(counting_minutes) > 60:
+                if int(time_taken.total_seconds()) >= 60 * 60:
                     completed = True
-                    send_data(counting_minutes, globals.activeGameIndex)
+                    send_data(time_taken.total_seconds() // 60, globals.activeGameIndex)
 
             if output != None and output is True:
                 globals.activeGameIndex += 1
 
                 if globals.activeGameIndex >= len(screens):
                     # Completed all the games
-                    send_data(counting_minutes, globals.activeGameIndex)
+                    send_data(time_taken.total_seconds() // 60, globals.activeGameIndex)
                     won = True
                     completed = True
 
