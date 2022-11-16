@@ -20,6 +20,8 @@ tetriminos:
 
 pygame.font.init()
 
+WINNING_SCORE = 10
+
 # global variables
 
 col = 10  # 10 columns
@@ -486,6 +488,10 @@ class Tetris(Game):
                 self.last_score = self.score
 
         if check_lost(self.locked_positions):
+            if self.score >= WINNING_SCORE:
+                # Won
+                return True
+
             # Lost, restart the game
             self.Restart()
             self.lost = True

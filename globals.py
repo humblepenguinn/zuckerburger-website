@@ -1,12 +1,11 @@
 # game
+from datetime import datetime
 
-activeGameIndex = 0
+active_game_index = 0
+start_time = datetime.now()
 
-def initialize():
-    global activeGameIndex
-    activeGameIndex = 0
-
-base_url: str = 'http://192.168.18.183:5000/'
-
-
+def StartChallenge():
+    global active_game_index, start_time
+    active_game_index = 1
+    start_time = datetime.now()
 
