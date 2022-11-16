@@ -1,3 +1,6 @@
+import json
+import math
+import random
 import secrets
 from flask import Flask, request, abort, jsonify
 from flask_bcrypt import Bcrypt
@@ -36,7 +39,7 @@ def register_user():
         return jsonify({"error": "User already exists"}), 409
 
     hashed_password = bcrypt.generate_password_hash(password)
-    new_user = User(hcid=hcid, password=hashed_password, time='0', puzzle_level='0')
+    new_user = User(hcid=hcid, password=hashed_password, time='0', puzzle_level='0', score='0')
 
     db.session.add(new_user)
     db.session.commit()
@@ -80,6 +83,34 @@ def add_shit():
     user.puzzle_level = puzzle_level
 
     db.session.commit()
+
+    return jsonify({"msg": "added shit"})
+
+def byTime(user):
+    return float(user.time)/float(user.puzzle_level)
+
+@app.route("/scores", methods=["GET"])
+def scores():
+    users = User.query.all()
+    print(users)
+    users.sort(key=byTime, reverse=True)
+
+    data = {}
+
+    for index, user in enumerate(users):
+
+        data[user.hcid] = {"score" : f"{index*1.25}"}
+
+    print(data)
+
+    with open('scores.json', 'w') as f:
+        json.dump(data, f)
+
+    return jsonify({"msg": "scores set" })
+
+
+
+
 
 
 

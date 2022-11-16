@@ -15,7 +15,8 @@ class User(db.Model):
     password = db.Column(db.String(345), unique=True)
     time = db.Column(db.String(345))
     puzzle_level =  db.Column(db.String(345))
-    
+    score = db.Column(db.String(345))
+
 
 
 
