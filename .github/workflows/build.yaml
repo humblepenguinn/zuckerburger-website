@@ -22,6 +22,5 @@ jobs:
       with:
         name: zuckerburger-app
         path: |
-      dist/main.exe
-      assets/
-      
+          dist/main.exe
+          assets/
