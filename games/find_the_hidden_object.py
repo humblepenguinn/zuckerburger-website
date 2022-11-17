@@ -12,6 +12,7 @@ import globals
 AMOUNT_OF_OBJ = 10
 HOVER_OBJ_COLOR = (190, 120, 255)
 OBJ_COLOR = (190, 120, 0)
+bg = pygame.transform.scale(pygame.image.load("assets/images/bg.png"), (1280, 720))
 
 class Object(pygame.sprite.Sprite):
     def __init__(self, groups: list[pygame.sprite.Group], pos: tuple[int, int], scale: tuple[int, int], image_path: str):
@@ -84,7 +85,7 @@ class FindTheHiddenObj(Game):
 
         self.object_group = pygame.sprite.Group()
         for _ in range(AMOUNT_OF_OBJ):
-            Object([self.object_group], (random.randint(0, 1280), random.randint(0, 720)), (20, 20), "assets/images/ball.png")
+            Object([self.object_group], (random.randint(0, 1280), random.randint(0, 720)), (5, 5), "assets/images/ball.png")
 
         self.timer_string = None
         self.counting_time = None
@@ -116,8 +117,11 @@ class FindTheHiddenObj(Game):
         It takes the image of each object in the object group and blits it to the main screen
         """
 
+        self.main_screen.blit(bg, (0,0))
         for object in self.object_group:
             self.main_screen.blit(object.image, object.rect)
+
+
 
 
 
