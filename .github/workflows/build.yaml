@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['windows-latest', 'ubuntu-latest', 'macos-latest']
+        os: ['windows-latest']
 
     steps:
     - uses: actions/checkout@v2
@@ -18,14 +18,7 @@ jobs:
     - run: pip install -r requirements.txt pyinstaller
     - run: pyinstaller --onefile --noconsole main.py
 
-    - uses: actions/checkout@v2
-    - name: Upload binaries to release
-      uses: svenstaro/upload-release-action@v2
+    - uses: actions/upload-artifact@v3
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: dist/main.exe
-        asset_name: mything
-        tag: ${{ github.ref }}
-        prerelease: true
-        overwrite: true
-        body: "gay"
+        name: zuckerburger-app
+        path: dist/main.exe
