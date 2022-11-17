@@ -19,6 +19,6 @@ jobs:
     - run: pyinstaller --onefile --noconsole main.py
 
     - uses: actions/upload-artifact@v2
-    with:
-      name: zuckerburger-app
-      path: dist/main.exe
+      with:
+        name: zuckerburger-app
+        path: dist/main.exe
