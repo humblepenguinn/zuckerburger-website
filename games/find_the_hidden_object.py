@@ -88,6 +88,14 @@ class FindTheHiddenObj(Game):
 
         self.timer_string = None
         self.counting_time = None
+
+    def OnEvent(self, event: pygame.event.Event):
+        if event.type == pygame.MOUSEBUTTONUP:
+            for object in self.object_group:
+                position = pygame.mouse.get_pos()
+                if position[0] in range(object.rect.left, object.rect.right) and position[1] in range(object.rect.top, object.rect.bottom):
+                    object.kill()
+
     def Update(self, dt):
         """
         It loops through all the objects in the object group and calls the Update function for each
@@ -95,11 +103,6 @@ class FindTheHiddenObj(Game):
         """
         for object in self.object_group:
             object.Update()
-            position = pygame.mouse.get_pos()
-            if position[0] in range(object.rect.left, object.rect.right) and position[1] in range(object.rect.top, object.rect.bottom):
-                object.kill()
-
-
 
         if len(self.object_group) == 0:
             return True
