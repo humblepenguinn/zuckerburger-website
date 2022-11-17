@@ -24,7 +24,7 @@ pygame.display.set_caption("Zuckerburger")
 clock = pygame.time.Clock()
 
 startMenuScreen = StartMenu(main_screen, clock)
-screens = [startMenuScreen, Tetris(main_screen, clock), TowerOfHanoi(main_screen, clock), Klotski(main_screen, clock), FindTheHiddenObj(main_screen, clock), games.color_switch.MainGame(main_screen, clock)]
+screens = [startMenuScreen, FindTheHiddenObj(main_screen, clock), TowerOfHanoi(main_screen, clock), Tetris(main_screen, clock), Klotski(main_screen, clock), games.color_switch.MainGame(main_screen, clock)]
 
 defaultFont = get_font(50)
 
